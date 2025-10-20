@@ -1,0 +1,67 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	"name": "example-wrangler-configuration",
+	"compatibility_date": "2025-09-24",
+	"compatibility_flags": ["nodejs_compat"],
+	"main": "@tanstack/react-start/server-entry",
+	"routes": [
+		{
+			"pattern": "example.com",
+			"custom_domain": true
+		}
+	],
+	"logpush": true,
+	"upload_source_maps": true,
+	"assets": {
+		"binding": "ASSETS"
+	},
+	"observability": {
+		"enabled": true
+	},
+	"vars": {
+		// The base URL of the app.
+		"SITE_URL": "http://localhost:3000",
+		// This can be found by running the `supabase status` command.
+		"SUPABASE_URL": "http://127.0.0.1:54321",
+		// This can be found by running the `supabase status` command.
+		"SUPABASE_PUBLISHABLE_KEY": "sb_publishable_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+	},
+	"services": [
+		{
+			"binding": "EXAMPLE_WORKFLOW",
+			"service": "example-workflow"
+		}
+	],
+	"secrets_store_secrets": [
+		{
+			"binding": "EXAMPLE_SECRET",
+			"store_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+			"secret_name": "example-secret"
+		}
+	],
+	"env": {
+		"production": {
+			"vars": {
+				// The base URL of the app.
+				"SITE_URL": "https://example.com",
+				// This can be found in the Supabase dashboard under Project Settings > Data API.
+				"SUPABASE_URL": "https://example.supabase.co",
+				// This can be found in the Supabase dashboard under Project Settings > API Keys.
+				"SUPABASE_PUBLISHABLE_KEY": "sb_publishable_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+			},
+			"services": [
+				{
+					"binding": "EXAMPLE_WORKFLOW",
+					"service": "example-workflow"
+				}
+			],
+			"secrets_store_secrets": [
+				{
+					"binding": "EXAMPLE_SECRET",
+					"store_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"secret_name": "example-secret"
+				}
+			]
+		}
+	}
+}

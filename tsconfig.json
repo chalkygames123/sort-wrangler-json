@@ -1,0 +1,38 @@
+{
+	"compilerOptions": {
+		// Type Checking
+		"allowUnreachableCode": false,
+		"allowUnusedLabels": false,
+		"exactOptionalPropertyTypes": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"noUncheckedIndexedAccess": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"strict": true,
+
+		// Modules
+		"module": "preserve",
+		"resolveJsonModule": true,
+		"types": ["json-schema", "node"],
+
+		// Emit
+		"noEmit": true,
+
+		// Interop Constraints
+		"erasableSyntaxOnly": true,
+		"verbatimModuleSyntax": true,
+
+		// Language and Environment
+		"jsx": "react-jsx",
+		"lib": ["ESNext"],
+		"libReplacement": true,
+		"moduleDetection": "force",
+		"target": "esnext",
+
+		// Completeness
+		"skipLibCheck": true
+	}
+}

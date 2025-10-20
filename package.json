@@ -1,0 +1,43 @@
+{
+	"name": "sort-wrangler-jsonc",
+	"version": "1.0.0",
+	"description": "An opinionated JSONC sorter for Wrangler configuration files.",
+	"license": "MIT",
+	"type": "module",
+	"bin": "./sort-wrangler-jsonc.ts",
+	"files": [
+		"./sort-wrangler-jsonc.ts"
+	],
+	"scripts": {
+		"test": "vitest run",
+		"test:watch": "vitest"
+	},
+	"dependencies": {
+		"eslint": "9.38.0",
+		"eslint-plugin-jsonc": "2.21.0",
+		"jsonc-eslint-parser": "2.4.1",
+		"jsonc-parser": "3.3.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.6",
+		"@types/json-schema": "7.0.15",
+		"@types/node": "24.8.1",
+		"typescript": "5.9.3",
+		"vitest": "3.2.4",
+		"wrangler": "4.43.0"
+	},
+	"packageManager": "pnpm@10.18.3",
+	"engines": {
+		"node": ">=23.6.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": "23.6.1",
+			"onFail": "download"
+		}
+	}
+}
