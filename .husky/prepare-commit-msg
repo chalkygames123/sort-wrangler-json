@@ -1,0 +1,10 @@
+readonly COMMIT_MSG_FILE="$1"
+readonly COMMIT_SOURCE="$2"
+
+case "${COMMIT_SOURCE}" in
+	message|template|squash|commit)
+		;;
+	merge)
+		perl -i.bak -pe 's/^Revert\b/revert:/' "$COMMIT_MSG_FILE"
+		;;
+esac

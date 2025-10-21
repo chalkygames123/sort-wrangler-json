@@ -21,11 +21,16 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.6",
+		"@commitlint/cli": "20.1.0",
+		"@commitlint/config-conventional": "20.0.0",
+		"@commitlint/types": "20.0.0",
 		"@types/json-schema": "7.0.15",
 		"@types/node": "24.8.1",
+		"husky": "9.1.7",
 		"typescript": "5.9.3",
 		"vitest": "3.2.4",
-		"wrangler": "4.43.0"
+		"wrangler": "4.43.0",
+		"zod": "4.1.12"
 	},
 	"packageManager": "pnpm@10.18.3",
 	"engines": {
