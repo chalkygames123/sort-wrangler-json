@@ -8,7 +8,7 @@ import {
 	generatePropertyOrder,
 	resolveSchemaRef,
 	sortJsoncContent,
-} from '../sort-wrangler-jsonc.js';
+} from './cli';
 
 describe('sort-wrangler-jsonc', () => {
 	describe('resolveSchemaRef', () => {
@@ -180,12 +180,12 @@ describe('sort-wrangler-jsonc', () => {
 		test('should sort unsorted fixture to match sorted fixture', async () => {
 			const unsortedPath = join(
 				import.meta.dirname,
-				'fixtures',
+				'test/fixtures',
 				'wrangler.unsorted.jsonc',
 			);
 			const sortedPath = join(
 				import.meta.dirname,
-				'fixtures',
+				'test/fixtures',
 				'wrangler.sorted.jsonc',
 			);
 

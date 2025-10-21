@@ -4,9 +4,9 @@
 	"description": "An opinionated JSONC sorter for Wrangler configuration files.",
 	"license": "MIT",
 	"type": "module",
-	"bin": "./sort-wrangler-jsonc.ts",
+	"bin": "./cli.ts",
 	"files": [
-		"./sort-wrangler-jsonc.ts"
+		"./cli.ts"
 	],
 	"scripts": {
 		"test": "vitest run",
