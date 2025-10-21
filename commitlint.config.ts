@@ -7,9 +7,17 @@ import {
 import { z } from 'zod';
 
 const getWorkspacePackages = (): string[] => {
-	const raw = execSync('pnpm list --recursive --json --depth -1 --filter !.', {
-		encoding: 'utf8',
-	});
+	const raw = execSync(
+		`pnpm list --recursive --json --depth -1 --filter '!.'`,
+		{
+			encoding: 'utf8',
+		},
+	);
+
+	if (!raw) {
+		return [];
+	}
+
 	const schema = z.object({ name: z.string() }).array();
 	const parsed: Array<{ name: string }> = schema.parse(JSON.parse(raw));
 	const names = parsed.map((p) => p.name);
@@ -69,7 +77,7 @@ export default {
 		'header-max-length': [RuleConfigSeverity.Disabled],
 		'scope-case': [RuleConfigSeverity.Error, 'always', 'lower-case'],
 		'subject-case': [RuleConfigSeverity.Disabled],
-		'custom/scope-empty-parentheses': [RuleConfigSeverity.Error, 'always'],
+		'custom/scope-empty-parentheses': [RuleConfigSeverity.Error, 'never'],
 		'custom/scope-enum': [
 			RuleConfigSeverity.Error,
 			'always',
