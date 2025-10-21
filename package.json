@@ -9,7 +9,13 @@
 		"./cli.ts"
 	],
 	"scripts": {
+		"check": "wireit",
+		"check:write": "wireit",
 		"ci": "node --eval \"fs.rmSync('node_modules/', { recursive: true, force: true })\" && pnpm install --frozen-lockfile",
+		"format": "wireit",
+		"format:write": "wireit",
+		"lint": "wireit",
+		"lint:write": "wireit",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"prepare": "husky"
@@ -30,6 +36,7 @@
 		"husky": "9.1.7",
 		"typescript": "5.9.3",
 		"vitest": "3.2.4",
+		"wireit": "0.14.12",
 		"wrangler": "4.43.0",
 		"zod": "4.1.12"
 	},
@@ -45,6 +52,26 @@
 			"name": "node",
 			"version": "23.6.1",
 			"onFail": "download"
+		}
+	},
+	"wireit": {
+		"check": {
+			"command": "biome check"
+		},
+		"check:write": {
+			"command": "biome check --write --unsafe"
+		},
+		"format": {
+			"command": "biome format"
+		},
+		"format:write": {
+			"command": "biome format --write"
+		},
+		"lint": {
+			"command": "biome lint"
+		},
+		"lint:write": {
+			"command": "biome lint --write --unsafe"
 		}
 	}
 }
