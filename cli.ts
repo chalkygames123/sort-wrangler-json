@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 
 import { readFile, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { ESLint, type Linter } from 'eslint';
 import eslintPluginJsonc from 'eslint-plugin-jsonc';
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 import jsoncEslintParser from 'jsonc-eslint-parser';
 
+/**
+ * Describes how jsonc/sort-keys should order properties at a given path.
+ */
 export interface SortKeysConfig {
 	pathPattern: string;
 	order:
@@ -15,20 +18,36 @@ export interface SortKeysConfig {
 		| { type: 'asc' | 'desc'; caseSensitive?: boolean; natural?: boolean };
 }
 
+/**
+ * Describes a segment in a property path when deriving jsonc/sort-keys patterns.
+ */
 type PathSegment =
 	| { kind: 'literal'; value: string }
 	| { kind: 'wildcard' }
 	| { kind: 'array' };
 
+/**
+ * Represents the path token used for array index lookups.
+ */
 const ARRAY_SEGMENT: PathSegment = { kind: 'array' };
+
+/**
+ * Represents the path token used for arbitrary property names.
+ */
 const WILDCARD_SEGMENT: PathSegment = { kind: 'wildcard' };
 
+/**
+ * Escapes characters that have special meaning in regular expressions.
+ */
 const escapeRegex = (value: string): string =>
 	value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+/**
+ * Builds the regex that jsonc/sort-keys expects for a given path.
+ */
 const buildPathPattern = (segments: PathSegment[]): string => {
 	if (segments.length === 0) {
-		// Root object: eslint-plugin-jsonc expects '^$' so that the empty path matches the top-level.
+		// Ensures eslint-plugin-jsonc receives '^$' so that the empty path matches the top-level.
 		return '^$';
 	}
 
@@ -65,8 +84,11 @@ const buildPathPattern = (segments: PathSegment[]): string => {
 	return `^${pattern}$`;
 };
 
+/**
+ * Follows chained $ref values until a concrete schema is reached.
+ */
 const resolveRefLoop = (
-	rootSchema: JSONSchema7,
+	sourceSchema: JSONSchema7,
 	schema: JSONSchema7,
 ): JSONSchema7 => {
 	let current: JSONSchema7 = schema;
@@ -79,29 +101,43 @@ const resolveRefLoop = (
 
 		visited.add(current);
 
-		current = resolveSchemaRef(rootSchema, current.$ref);
+		current = resolveSchemaRef(sourceSchema, current.$ref);
 	}
 
 	return current;
 };
 
+/**
+ * Resolves a schema definition, handling booleans per JSON Schema semantics.
+ */
 const resolveDefinition = (
 	rootSchema: JSONSchema7,
 	definition: JSONSchema7Definition | undefined,
 ): JSONSchema7 | null => {
-	if (!definition || typeof definition === 'boolean') {
+	if (definition === undefined || definition === false) {
 		return null;
+	}
+
+	if (definition === true) {
+		// Treats "accept anything" as an empty schema so downstream logic can continue safely.
+		return {};
 	}
 
 	return resolveRefLoop(rootSchema, definition);
 };
 
+/**
+ * Checks whether a schema contains object properties.
+ */
 const hasProperties = (
 	schema: JSONSchema7,
 ): schema is JSONSchema7 & {
 	properties: Record<string, JSONSchema7Definition>;
 } => Boolean(schema.properties && isRecord(schema.properties));
 
+/**
+ * Checks whether a schema can describe an array.
+ */
 const isArraySchema = (schema: JSONSchema7): boolean => {
 	if (Array.isArray(schema.type)) {
 		return schema.type.includes('array');
@@ -111,7 +147,7 @@ const isArraySchema = (schema: JSONSchema7): boolean => {
 };
 
 /**
- * Type guard for checking if a value is a record.
+ * Checks if a value is a record.
  *
  * @param value - The value to check.
  * @returns True if the value is a non-null object.
@@ -120,7 +156,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 	typeof value === 'object' && value !== null;
 
 /**
- * Type guard for checking if a value is a JSONSchema7.
+ * Checks if a value is a JSONSchema7.
  *
  * @param value - The value to check.
  * @returns True if the value is structurally compatible with JSONSchema7.
@@ -228,6 +264,7 @@ export const generatePropertyOrder = (schema: JSONSchema7): string[] => {
 		throw new Error('The root schema does not contain any properties.');
 	}
 
+	// Relies on Object.keys preserving declaration order for plain objects, which matches JSON Schema author intent.
 	const allKeys = Object.keys(schema.properties);
 
 	return [
@@ -248,7 +285,7 @@ export const createSortKeysConfigs = (
 	fullSchema: JSONSchema7,
 ): SortKeysConfig[] => {
 	const configs: SortKeysConfig[] = [];
-	// Prevent duplicate ESLint rules when multiple schema paths resolve to the same pattern.
+	// Prevents duplicate ESLint rules when multiple schema paths resolve to the same pattern.
 	const seenPatterns = new Set<string>();
 
 	const registerObjectConfig = (
@@ -395,7 +432,7 @@ export const createSortingESLint = (
 };
 
 /**
- * Sorts a JSONC content using ESLint.
+ * Sorts JSONC content using ESLint.
  *
  * @param content - The JSONC content to sort.
  * @param filePath - The file path for error reporting.
@@ -427,7 +464,7 @@ export const sortJsoncContent = async (
 };
 
 /**
- * Main function for CLI execution.
+ * Serves as the main entry point for CLI execution.
  */
 const main = async (): Promise<void> => {
 	const { values } = parseArgs({
@@ -477,16 +514,12 @@ Examples:
 	const ast = jsoncEslintParser.parseForESLint(configContent, {
 		filePath: configPath,
 	});
-
 	const schemaPath = extractSchemaPath(ast);
-	const schemaFilePath = join(dirname(configPath), schemaPath);
-
+	const schemaFilePath = path.join(path.dirname(configPath), schemaPath);
 	const schemaContent = await readFile(schemaFilePath, 'utf-8');
 	const schema: JSONSchema7 = JSON.parse(schemaContent);
-
 	const rootSchema = extractRootSchema(schema);
 	const sortKeysConfigs = createSortKeysConfigs(rootSchema, schema);
-
 	const { sortedContent } = await sortJsoncContent(
 		configContent,
 		configPath,
@@ -502,7 +535,7 @@ Examples:
 	}
 };
 
-// Only run main when executed as a script (not when imported as a module)
+// Runs main only when the file executes as a script (not when imported as a module).
 if (import.meta.url === `file://${process.argv[1]}`) {
 	main().catch((error) => {
 		console.error('Error:', error instanceof Error ? error.message : error);
