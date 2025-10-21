@@ -1,12 +1,10 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { JSONSchema7 } from 'json-schema';
-import jsoncEslintParser from 'jsonc-eslint-parser';
 import { describe, expect, test } from 'vitest';
 import {
 	createSortKeysConfigs,
 	extractRootSchema,
-	extractSchemaPath,
 	generatePropertyOrder,
 	resolveSchemaRef,
 	sortJsoncContent,
@@ -267,15 +265,16 @@ describe('sort-wrangler-jsonc', () => {
 				expectedConfigFilePath,
 				'utf-8',
 			);
-			const ast = jsoncEslintParser.parseForESLint(originalConfigContent, {
-				filePath: originalConfigFilePath,
-			});
-			const schemaPath = extractSchemaPath(ast);
+			const configDirectory = path.dirname(originalConfigFilePath);
 			const schemaFilePath = path.join(
-				path.dirname(originalConfigFilePath),
-				schemaPath,
+				import.meta.dirname,
+				'node_modules/wrangler/config-schema.json',
 			);
-			const schemaContent = await readFile(schemaFilePath, 'utf-8');
+			const schemaFilePathAbsolute = path.resolve(
+				configDirectory,
+				path.relative(configDirectory, schemaFilePath),
+			);
+			const schemaContent = await readFile(schemaFilePathAbsolute, 'utf-8');
 			const schema: JSONSchema7 = JSON.parse(schemaContent);
 			const rootSchema = extractRootSchema(schema);
 			const sortKeysConfigs = createSortKeysConfigs(rootSchema, schema);

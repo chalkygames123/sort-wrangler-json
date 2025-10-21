@@ -209,7 +209,7 @@ export const extractRootSchema = (schema: JSONSchema7): JSONSchema7 => {
  * @param ast - The parsed AST of the JSONC file.
  * @returns The value of the $schema property.
  */
-export const extractSchemaPath = (
+const extractSchemaPath = (
 	ast: ReturnType<typeof jsoncEslintParser.parseForESLint>,
 ): string => {
 	const expressionStatement = ast.ast.body[0];
@@ -458,13 +458,22 @@ export const sortJsoncContent = async (
  */
 const main = async (): Promise<void> => {
 	const {
-		values: { config: configFilePath, write: shouldWrite, help: showHelp },
+		values: {
+			config: configFilePath,
+			schema: schemaFilePathOverride,
+			write: shouldWrite,
+			help: showHelp,
+		},
 	} = parseArgs({
 		options: {
 			config: {
 				type: 'string',
 				short: 'c',
 				default: './wrangler.jsonc',
+			},
+			schema: {
+				type: 'string',
+				short: 's',
 			},
 			write: {
 				type: 'boolean',
@@ -487,6 +496,7 @@ Usage: sort-wrangler-jsonc [options]
 
 Options:
   -c, --config <path>  Path to the configuration file (default: ./wrangler.jsonc)
+	-s, --schema <path>  Override the schema file path (relative to the configuration file)
   -w, --write          Write the sorted output to the file
   -h, --help           Display this help message
 
@@ -503,9 +513,12 @@ Examples:
 	const ast = jsoncEslintParser.parseForESLint(configContent, {
 		filePath: configFilePath,
 	});
-	const schemaPath = extractSchemaPath(ast);
-	const schemaFilePath = path.join(path.dirname(configFilePath), schemaPath);
-	const schemaContent = await readFile(schemaFilePath, 'utf-8');
+	const configDirectory = path.dirname(configFilePath);
+	const schemaFilePath = schemaFilePathOverride ?? extractSchemaPath(ast);
+	const schemaFilePathAbsolute = path.isAbsolute(schemaFilePath)
+		? schemaFilePath
+		: path.resolve(configDirectory, schemaFilePath);
+	const schemaContent = await readFile(schemaFilePathAbsolute, 'utf-8');
 	const schema: JSONSchema7 = JSON.parse(schemaContent);
 	const rootSchema = extractRootSchema(schema);
 	const sortKeysConfigs = createSortKeysConfigs(rootSchema, schema);

@@ -27,6 +27,7 @@ npx sort-wrangler-jsonc
 | Option            | Short | Description                         | Default            |
 | ----------------- | ----- | ----------------------------------- | ------------------ |
 | `--config <path>` | `-c`  | Path to the configuration file      | `./wrangler.jsonc` |
+| `--schema <path>` | `-s`  | Override the schema file path       | `undefined`        |
 | `--write`         | `-w`  | Write the sorted output to the file | `false`            |
 | `--help`          | `-h`  | Display help message                | `false`            |
 
