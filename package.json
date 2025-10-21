@@ -39,6 +39,9 @@
 		"wrangler": "4.43.0",
 		"zod": "4.1.12"
 	},
+	"peerDependencies": {
+		"eslint": "^9.0.0"
+	},
 	"packageManager": "pnpm@10.18.3",
 	"engines": {
 		"node": ">=23.6.0"
