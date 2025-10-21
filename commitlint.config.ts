@@ -81,7 +81,7 @@ export default {
 		'custom/scope-enum': [
 			RuleConfigSeverity.Error,
 			'always',
-			getWorkspacePackages(),
+			[...getWorkspacePackages(), 'deps'],
 		],
 	},
 } satisfies UserConfig;
