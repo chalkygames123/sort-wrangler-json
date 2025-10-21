@@ -125,21 +125,81 @@ describe('sort-wrangler-jsonc', () => {
 	});
 
 	describe('createSortKeysConfigs', () => {
-		test('should create sort keys configs for root and env', () => {
-			const propertyOrder = ['name', 'main', 'env'];
-
-			const result = createSortKeysConfigs(propertyOrder);
-
-			expect(result).toEqual([
-				{
-					pathPattern: '^$',
-					order: ['name', 'main', 'env'],
+		test('should build configurations for nested schema paths', () => {
+			const schema: JSONSchema7 = {
+				definitions: {
+					Nested: {
+						type: 'object',
+						properties: {
+							delta: { type: 'string' },
+							alpha: { type: 'string' },
+						},
+					},
+					ListEntry: {
+						type: 'object',
+						properties: {
+							z: { type: 'string' },
+							a: { type: 'string' },
+						},
+					},
+					EnvConfig: {
+						type: 'object',
+						properties: {
+							gamma: { type: 'string' },
+							beta: { type: 'string' },
+							list: {
+								type: 'array',
+								items: { $ref: '#/definitions/ListEntry' },
+							},
+							nested: { $ref: '#/definitions/Nested' },
+						},
+					},
 				},
-				{
-					pathPattern: '^env\\..+$',
-					order: ['name', 'main', 'env'],
+				properties: {
+					foo: { type: 'string' },
+					bar: {
+						type: 'object',
+						properties: {
+							second: { type: 'string' },
+							first: { type: 'string' },
+							nested: { $ref: '#/definitions/Nested' },
+						},
+					},
+					baz: {
+						type: 'array',
+						items: { $ref: '#/definitions/ListEntry' },
+					},
+					env: {
+						type: 'object',
+						additionalProperties: { $ref: '#/definitions/EnvConfig' },
+					},
 				},
-			]);
+			};
+
+			const rootSchema = extractRootSchema(schema);
+			const configs = createSortKeysConfigs(rootSchema, schema);
+
+			const findConfig = (pattern: string) =>
+				configs.find((config) => config.pathPattern === pattern);
+
+			expect(findConfig('^$')).toMatchObject({
+				order: ['foo', 'bar', 'baz', 'env'],
+			});
+			expect(findConfig('^bar$')).toMatchObject({
+				order: ['second', 'first', 'nested'],
+			});
+			expect(findConfig('^bar\\.nested$')).toMatchObject({
+				order: ['delta', 'alpha'],
+			});
+			expect(findConfig('^baz\\[[0-9]+\\]$')).toMatchObject({
+				order: ['z', 'a'],
+			});
+			expect(findConfig('^env\\.[^.]+$')).toMatchObject({
+				order: ['gamma', 'beta', 'list', 'nested'],
+			});
+			expect(findConfig('^env\\.[^.]+\\.list\\[[0-9]+\\]$')).toMatchObject({
+				order: ['z', 'a'],
+			});
 		});
 	});
 
@@ -191,24 +251,16 @@ describe('sort-wrangler-jsonc', () => {
 
 			const unsortedContent = await readFile(unsortedPath, 'utf-8');
 			const expectedSorted = await readFile(sortedPath, 'utf-8');
-
-			// Extract schema and generate property order (simplified for test)
-			const sortKeysConfigs = createSortKeysConfigs([
-				'$schema',
-				'name',
-				'compatibility_date',
-				'compatibility_flags',
-				'main',
-				'routes',
-				'logpush',
-				'upload_source_maps',
-				'assets',
-				'observability',
-				'vars',
-				'services',
-				'secrets_store_secrets',
-				'env',
-			]);
+			const schemaPath = join(
+				import.meta.dirname,
+				'node_modules',
+				'wrangler',
+				'config-schema.json',
+			);
+			const schemaContent = await readFile(schemaPath, 'utf-8');
+			const schema = JSON.parse(schemaContent) as JSONSchema7;
+			const rootSchema = extractRootSchema(schema);
+			const sortKeysConfigs = createSortKeysConfigs(rootSchema, schema);
 
 			const { sortedContent } = await sortJsoncContent(
 				unsortedContent,

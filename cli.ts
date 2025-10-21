@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { ESLint, type Linter } from 'eslint';
 import eslintPluginJsonc from 'eslint-plugin-jsonc';
-import type { JSONSchema7 } from 'json-schema';
+import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 import jsoncEslintParser from 'jsonc-eslint-parser';
 
 export interface SortKeysConfig {
@@ -15,6 +15,100 @@ export interface SortKeysConfig {
 		| string[]
 		| { type: 'asc' | 'desc'; caseSensitive?: boolean; natural?: boolean };
 }
+
+type PathSegment =
+	| { kind: 'literal'; value: string }
+	| { kind: 'wildcard' }
+	| { kind: 'array' };
+
+const ARRAY_SEGMENT: PathSegment = { kind: 'array' };
+const WILDCARD_SEGMENT: PathSegment = { kind: 'wildcard' };
+
+const escapeRegex = (value: string): string =>
+	value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const buildPathPattern = (segments: PathSegment[]): string => {
+	if (segments.length === 0) {
+		return '^$';
+	}
+
+	let pattern = '';
+
+	for (const segment of segments) {
+		switch (segment.kind) {
+			case 'literal': {
+				if (pattern.length > 0) {
+					pattern += '\\.';
+				}
+
+				pattern += escapeRegex(segment.value);
+
+				break;
+			}
+			case 'wildcard': {
+				if (pattern.length > 0) {
+					pattern += '\\.';
+				}
+
+				pattern += '[^.]+';
+
+				break;
+			}
+			case 'array': {
+				pattern += '\\[[0-9]+\\]';
+
+				break;
+			}
+		}
+	}
+
+	return `^${pattern}$`;
+};
+
+const resolveRefLoop = (
+	rootSchema: JSONSchema7,
+	schema: JSONSchema7,
+): JSONSchema7 => {
+	let current: JSONSchema7 = schema;
+	const visited = new Set<JSONSchema7>();
+
+	while (current.$ref) {
+		if (visited.has(current)) {
+			break;
+		}
+
+		visited.add(current);
+
+		current = resolveSchemaRef(rootSchema, current.$ref);
+	}
+
+	return current;
+};
+
+const resolveDefinition = (
+	rootSchema: JSONSchema7,
+	definition: JSONSchema7Definition | undefined,
+): JSONSchema7 | null => {
+	if (!definition || typeof definition === 'boolean') {
+		return null;
+	}
+
+	return resolveRefLoop(rootSchema, definition);
+};
+
+const hasProperties = (
+	schema: JSONSchema7,
+): schema is JSONSchema7 & {
+	properties: Record<string, JSONSchema7Definition>;
+} => Boolean(schema.properties && isRecord(schema.properties));
+
+const isArraySchema = (schema: JSONSchema7): boolean => {
+	if (Array.isArray(schema.type)) {
+		return schema.type.includes('array');
+	}
+
+	return schema.type === 'array' || schema.items !== undefined;
+};
 
 /**
  * Type guard for checking if a value is a record.
@@ -143,23 +237,121 @@ export const generatePropertyOrder = (schema: JSONSchema7): string[] => {
 };
 
 /**
- * Creates sort keys configurations for the root and env objects.
+ * Creates sort keys configurations for all object paths described by the schema.
  *
- * @param propertyOrder - The property order to use.
- * @returns An array of sort keys configurations.
+ * @param rootSchema - The resolved root schema definition.
+ * @param fullSchema - The original schema containing definitions.
+ * @returns An array of sort keys configurations keyed by path pattern.
  */
 export const createSortKeysConfigs = (
-	propertyOrder: string[],
-): SortKeysConfig[] => [
-	{
-		pathPattern: '^$',
-		order: propertyOrder,
-	},
-	{
-		pathPattern: '^env\\..+$',
-		order: propertyOrder,
-	},
-];
+	rootSchema: JSONSchema7,
+	fullSchema: JSONSchema7,
+): SortKeysConfig[] => {
+	const configs: SortKeysConfig[] = [];
+	const seenPatterns = new Set<string>();
+
+	const processArray = (schema: JSONSchema7, path: PathSegment[]): void => {
+		const { items } = schema;
+
+		if (!items) {
+			return;
+		}
+
+		const itemSchemas = Array.isArray(items) ? items : [items];
+
+		for (const item of itemSchemas) {
+			const resolvedItem = resolveDefinition(fullSchema, item);
+
+			if (!resolvedItem) {
+				continue;
+			}
+
+			processSchema(resolvedItem, [...path, ARRAY_SEGMENT]);
+		}
+	};
+
+	const visit = (schema: JSONSchema7, path: PathSegment[]): void => {
+		const resolvedSchema = resolveRefLoop(fullSchema, schema);
+
+		if (hasProperties(resolvedSchema)) {
+			const propertyNames = Object.keys(resolvedSchema.properties);
+
+			if (propertyNames.length > 0) {
+				const pattern = buildPathPattern(path);
+
+				if (!seenPatterns.has(pattern)) {
+					configs.push({
+						pathPattern: pattern,
+						order: generatePropertyOrder(resolvedSchema),
+					});
+
+					seenPatterns.add(pattern);
+				}
+			}
+
+			for (const [propertyName, definition] of Object.entries(
+				resolvedSchema.properties,
+			)) {
+				const resolvedDefinition = resolveDefinition(fullSchema, definition);
+
+				if (!resolvedDefinition) {
+					continue;
+				}
+
+				processSchema(resolvedDefinition, [
+					...path,
+					{ kind: 'literal', value: propertyName },
+				]);
+			}
+		}
+
+		if (
+			resolvedSchema.additionalProperties &&
+			typeof resolvedSchema.additionalProperties !== 'boolean'
+		) {
+			const additional = resolveDefinition(
+				fullSchema,
+				resolvedSchema.additionalProperties,
+			);
+
+			if (additional) {
+				processSchema(additional, [...path, WILDCARD_SEGMENT]);
+			}
+		}
+
+		if (isArraySchema(resolvedSchema)) {
+			processArray(resolvedSchema, path);
+		}
+	};
+
+	const processSchema = (schema: JSONSchema7, path: PathSegment[]): void => {
+		const resolvedSchema = resolveRefLoop(fullSchema, schema);
+
+		if (hasProperties(resolvedSchema) || isArraySchema(resolvedSchema)) {
+			visit(resolvedSchema, path);
+
+			return;
+		}
+
+		if (
+			resolvedSchema.additionalProperties &&
+			typeof resolvedSchema.additionalProperties !== 'boolean'
+		) {
+			const additional = resolveDefinition(
+				fullSchema,
+				resolvedSchema.additionalProperties,
+			);
+
+			if (additional) {
+				processSchema(additional, [...path, WILDCARD_SEGMENT]);
+			}
+		}
+	};
+
+	visit(rootSchema, []);
+
+	return configs;
+};
 
 /**
  * Creates an ESLint instance configured for sorting JSONC files.
@@ -283,8 +475,7 @@ Examples:
 	const schema: JSONSchema7 = JSON.parse(schemaContent);
 
 	const rootSchema = extractRootSchema(schema);
-	const rootPropertyOrder = generatePropertyOrder(rootSchema);
-	const sortKeysConfigs = createSortKeysConfigs(rootPropertyOrder);
+	const sortKeysConfigs = createSortKeysConfigs(rootSchema, schema);
 
 	const { sortedContent } = await sortJsoncContent(
 		configContent,

@@ -24,15 +24,15 @@
 	},
 	"secrets_store_secrets": [
 		{
-			"binding": "EXAMPLE_SECRET",
 			"store_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+			"binding": "EXAMPLE_SECRET",
 			"secret_name": "example-secret"
 		}
 	],
 	"services": [
 		{
-			"binding": "EXAMPLE_WORKFLOW",
-			"service": "example-workflow"
+			"service": "example-workflow",
+			"binding": "EXAMPLE_WORKFLOW"
 		}
 	],
 	"assets": {
@@ -51,15 +51,15 @@
 			},
 			"secrets_store_secrets": [
 				{
-					"binding": "EXAMPLE_SECRET",
 					"store_id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+					"binding": "EXAMPLE_SECRET",
 					"secret_name": "example-secret"
 				}
 			],
 			"services": [
 				{
-					"binding": "EXAMPLE_WORKFLOW",
-					"service": "example-workflow"
+					"service": "example-workflow",
+					"binding": "EXAMPLE_WORKFLOW"
 				}
 			]
 		}
