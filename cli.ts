@@ -42,6 +42,20 @@ const WILDCARD_SEGMENT: PathSegment = { kind: 'wildcard' };
 const escapeRegex = (value: string): string =>
 	value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+const formatPathSegment = (segment: PathSegment): string => {
+	switch (segment.kind) {
+		case 'literal':
+			return escapeRegex(segment.value);
+		case 'wildcard':
+			return '[^.]+';
+		case 'array':
+			return '\\[[0-9]+\\]';
+		default: {
+			throw new Error('Unexpected path segment kind.');
+		}
+	}
+};
+
 /**
  * Builds the regex that jsonc/sort-keys expects for a given path.
  */
@@ -51,37 +65,15 @@ const buildPathPattern = (segments: PathSegment[]): string => {
 		return '^$';
 	}
 
-	let pattern = '';
+	const segmentPattern = segments
+		.map((segment, index) => {
+			const prefix = index === 0 || segment.kind === 'array' ? '' : '\\.';
 
-	for (const segment of segments) {
-		switch (segment.kind) {
-			case 'literal': {
-				if (pattern.length > 0) {
-					pattern += '\\.';
-				}
+			return `${prefix}${formatPathSegment(segment)}`;
+		})
+		.join('');
 
-				pattern += escapeRegex(segment.value);
-
-				break;
-			}
-			case 'wildcard': {
-				if (pattern.length > 0) {
-					pattern += '\\.';
-				}
-
-				pattern += '[^.]+';
-
-				break;
-			}
-			case 'array': {
-				pattern += '\\[[0-9]+\\]';
-
-				break;
-			}
-		}
-	}
-
-	return `^${pattern}$`;
+	return `^${segmentPattern}$`;
 };
 
 /**
@@ -90,9 +82,9 @@ const buildPathPattern = (segments: PathSegment[]): string => {
 const resolveRefLoop = (
 	sourceSchema: JSONSchema7,
 	schema: JSONSchema7,
+	visited: Set<JSONSchema7> = new Set(),
 ): JSONSchema7 => {
 	let current: JSONSchema7 = schema;
-	const visited = new Set<JSONSchema7>();
 
 	while (current.$ref) {
 		if (visited.has(current)) {
@@ -108,10 +100,9 @@ const resolveRefLoop = (
 };
 
 /**
- * Resolves a schema definition, handling booleans per JSON Schema semantics.
+ * Normalizes a schema definition, handling booleans per JSON Schema semantics.
  */
 const resolveDefinition = (
-	rootSchema: JSONSchema7,
 	definition: JSONSchema7Definition | undefined,
 ): JSONSchema7 | null => {
 	if (definition === undefined || definition === false) {
@@ -123,7 +114,7 @@ const resolveDefinition = (
 		return {};
 	}
 
-	return resolveRefLoop(rootSchema, definition);
+	return definition;
 };
 
 /**
@@ -292,7 +283,11 @@ export const createSortKeysConfigs = (
 		schema: JSONSchema7,
 		path: PathSegment[],
 	): void => {
-		const propertyNames = Object.keys(schema.properties ?? {});
+		if (!hasProperties(schema)) {
+			return;
+		}
+
+		const propertyNames = Object.keys(schema.properties);
 
 		if (propertyNames.length === 0) {
 			return;
@@ -323,7 +318,7 @@ export const createSortKeysConfigs = (
 		for (const [propertyName, definition] of Object.entries(
 			schema.properties,
 		)) {
-			const resolvedDefinition = resolveDefinition(fullSchema, definition);
+			const resolvedDefinition = resolveDefinition(definition);
 
 			if (!resolvedDefinition) {
 				continue;
@@ -347,10 +342,7 @@ export const createSortKeysConfigs = (
 			return;
 		}
 
-		const additional = resolveDefinition(
-			fullSchema,
-			schema.additionalProperties,
-		);
+		const additional = resolveDefinition(schema.additionalProperties);
 
 		if (additional) {
 			traverseSchema(additional, [...path, WILDCARD_SEGMENT]);
@@ -370,7 +362,7 @@ export const createSortKeysConfigs = (
 		const itemSchemas = Array.isArray(items) ? items : [items];
 
 		for (const item of itemSchemas) {
-			const resolvedItem = resolveDefinition(fullSchema, item);
+			const resolvedItem = resolveDefinition(item);
 
 			if (!resolvedItem) {
 				continue;
@@ -465,7 +457,9 @@ export const sortJsoncContent = async (
  * Serves as the main entry point for CLI execution.
  */
 const main = async (): Promise<void> => {
-	const { values } = parseArgs({
+	const {
+		values: { config: configFilePath, write: shouldWrite, help: showHelp },
+	} = parseArgs({
 		options: {
 			config: {
 				type: 'string',
@@ -487,7 +481,7 @@ const main = async (): Promise<void> => {
 		allowPositionals: false,
 	});
 
-	if (values.help) {
+	if (showHelp) {
 		console.log(`
 Usage: sort-wrangler-jsonc [options]
 
@@ -502,11 +496,8 @@ Examples:
   sort-wrangler-jsonc -c config.jsonc -w   # Sort and write to specified file
 `);
 
-		process.exit(0);
+		return;
 	}
-
-	const configFilePath = values.config;
-	const shouldWrite = values.write;
 
 	const configContent = await readFile(configFilePath, 'utf-8');
 	const ast = jsoncEslintParser.parseForESLint(configContent, {
