@@ -24,12 +24,12 @@ npx sort-wrangler-jsonc
 
 ## Options
 
-| Option            | Short | Description                         | Default            |
-| ----------------- | ----- | ----------------------------------- | ------------------ |
-| `--config <path>` | `-c`  | Path to the configuration file      | `./wrangler.jsonc` |
-| `--schema <path>` | `-s`  | Override the schema file path       | `undefined`        |
-| `--write`         | `-w`  | Write the sorted output to the file | `false`            |
-| `--help`          | `-h`  | Display help message                | `false`            |
+| Option            | Short | Type    | Description                         | Default            |
+| ----------------- | ----- | ------- | ----------------------------------- | ------------------ |
+| `--config <path>` | `-c`  | string  | Path to the configuration file      | `./wrangler.jsonc` |
+| `--schema <path>` | `-s`  | string  | Override the schema file path       | `undefined`        |
+| `--write`         | `-w`  | boolean | Write the sorted output to the file | `false`            |
+| `--help`          | `-h`  | boolean | Display help message                | `false`            |
 
 ## How It Works
 
