@@ -502,6 +502,7 @@ Options:
 
 Examples:
   sort-wrangler-jsonc                      # Display sorted output
+	sort-wrangler-jsonc -s schema.jsonc      # Use a custom schema file
   sort-wrangler-jsonc -w                   # Sort and write to default file
   sort-wrangler-jsonc -c config.jsonc -w   # Sort and write to specified file
 `);
