@@ -11,7 +11,7 @@ import jsoncEslintParser from 'jsonc-eslint-parser';
 /**
  * Describes how jsonc/sort-keys should order properties at a given path.
  */
-export interface SortKeysConfig {
+interface SortKeysConfig {
 	pathPattern: string;
 	order:
 		| string[]
@@ -406,9 +406,7 @@ export const createSortKeysConfigs = (
  * @param sortKeysConfigs - The sort keys configuration.
  * @returns A configured ESLint instance.
  */
-export const createSortingESLint = (
-	sortKeysConfigs: SortKeysConfig[],
-): ESLint => {
+const createSortingESLint = (sortKeysConfigs: SortKeysConfig[]): ESLint => {
 	const eslintConfig = [
 		{
 			files: ['**/*.jsonc'],
@@ -443,7 +441,7 @@ export const sortJsoncContent = async (
 	content: string,
 	filePath: string,
 	sortKeysConfigs: SortKeysConfig[],
-): Promise<{ sortedContent: string; result: ESLint.LintResult }> => {
+): Promise<{ output: string; result: ESLint.LintResult }> => {
 	const eslint = createSortingESLint(sortKeysConfigs);
 	const results = await eslint.lintText(content, { filePath });
 	const [result] = results;
@@ -458,9 +456,9 @@ export const sortJsoncContent = async (
 		throw new Error(`Fatal error: ${fatalError?.message ?? 'Unknown error'}`);
 	}
 
-	const sortedContent = result.output ?? content;
+	const output = result.output ?? content;
 
-	return { sortedContent, result };
+	return { output, result };
 };
 
 /**
@@ -507,31 +505,31 @@ Examples:
 		process.exit(0);
 	}
 
-	const configPath = values.config;
+	const configFilePath = values.config;
 	const shouldWrite = values.write;
 
-	const configContent = await readFile(configPath, 'utf-8');
+	const configContent = await readFile(configFilePath, 'utf-8');
 	const ast = jsoncEslintParser.parseForESLint(configContent, {
-		filePath: configPath,
+		filePath: configFilePath,
 	});
 	const schemaPath = extractSchemaPath(ast);
-	const schemaFilePath = path.join(path.dirname(configPath), schemaPath);
+	const schemaFilePath = path.join(path.dirname(configFilePath), schemaPath);
 	const schemaContent = await readFile(schemaFilePath, 'utf-8');
 	const schema: JSONSchema7 = JSON.parse(schemaContent);
 	const rootSchema = extractRootSchema(schema);
 	const sortKeysConfigs = createSortKeysConfigs(rootSchema, schema);
-	const { sortedContent } = await sortJsoncContent(
+	const { output } = await sortJsoncContent(
 		configContent,
-		configPath,
+		configFilePath,
 		sortKeysConfigs,
 	);
 
 	if (shouldWrite) {
-		await writeFile(configPath, sortedContent, 'utf-8');
+		await writeFile(configFilePath, output, 'utf-8');
 
-		console.log(`Successfully sorted and wrote to ${configPath}.`);
+		console.log(`Successfully sorted and wrote to ${configFilePath}.`);
 	} else {
-		process.stdout.write(sortedContent);
+		process.stdout.write(output);
 	}
 };
 

@@ -1,10 +1,12 @@
 import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import path from 'node:path';
 import type { JSONSchema7 } from 'json-schema';
+import jsoncEslintParser from 'jsonc-eslint-parser';
 import { describe, expect, test } from 'vitest';
 import {
 	createSortKeysConfigs,
 	extractRootSchema,
+	extractSchemaPath,
 	generatePropertyOrder,
 	resolveSchemaRef,
 	sortJsoncContent,
@@ -230,57 +232,60 @@ describe('sort-wrangler-jsonc', () => {
 					order: ['name', 'compatibility_date', 'main'],
 				},
 			];
-
-			const { sortedContent } = await sortJsoncContent(
+			const { output } = await sortJsoncContent(
 				content,
 				filePath,
 				sortKeysConfigs,
 			);
-
 			const expected = `{
 	"name": "test",
 	"compatibility_date": "2025-01-01",
 	"main": "index.js"
 }`;
 
-			expect(sortedContent).toBe(expected);
+			expect(output).toBe(expected);
 		});
 	});
 
 	describe('integration test', () => {
 		test('should sort unsorted fixture to match sorted fixture', async () => {
-			const unsortedPath = join(
+			const originalConfigFilePath = path.join(
 				import.meta.dirname,
 				'test/fixtures',
-				'wrangler.unsorted.jsonc',
+				'wrangler.original.jsonc',
 			);
-			const sortedPath = join(
+			const expectedConfigFilePath = path.join(
 				import.meta.dirname,
 				'test/fixtures',
-				'wrangler.sorted.jsonc',
+				'wrangler.expected.jsonc',
 			);
-
-			const unsortedContent = await readFile(unsortedPath, 'utf-8');
-			const expectedSorted = await readFile(sortedPath, 'utf-8');
-			// Use Wrangler's published schema so this test reflects real-world sorting.
-			const schemaPath = join(
-				import.meta.dirname,
-				'node_modules',
-				'wrangler',
-				'config-schema.json',
+			const originalConfigContent = await readFile(
+				originalConfigFilePath,
+				'utf-8',
 			);
-			const schemaContent = await readFile(schemaPath, 'utf-8');
-			const schema = JSON.parse(schemaContent) as JSONSchema7;
+			const expectedConfigContent = await readFile(
+				expectedConfigFilePath,
+				'utf-8',
+			);
+			const ast = jsoncEslintParser.parseForESLint(originalConfigContent, {
+				filePath: originalConfigFilePath,
+			});
+			const schemaPath = extractSchemaPath(ast);
+			const schemaFilePath = path.join(
+				path.dirname(originalConfigFilePath),
+				schemaPath,
+			);
+			const schemaContent = await readFile(schemaFilePath, 'utf-8');
+			const schema: JSONSchema7 = JSON.parse(schemaContent);
 			const rootSchema = extractRootSchema(schema);
 			const sortKeysConfigs = createSortKeysConfigs(rootSchema, schema);
-
-			const { sortedContent } = await sortJsoncContent(
-				unsortedContent,
-				unsortedPath,
+			const { output } = await sortJsoncContent(
+				originalConfigContent,
+				originalConfigFilePath,
 				sortKeysConfigs,
 			);
 
-			expect(sortedContent).toBe(expectedSorted);
+			expect(output).toBe(expectedConfigContent);
 		});
 	});
 });
