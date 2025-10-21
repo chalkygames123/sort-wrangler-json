@@ -9,6 +9,7 @@
 		"./cli.ts"
 	],
 	"scripts": {
+		"ci": "node --eval \"fs.rmSync('node_modules/', { recursive: true, force: true })\" && pnpm install --frozen-lockfile",
 		"test": "vitest run",
 		"test:watch": "vitest"
 	},
