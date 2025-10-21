@@ -13,9 +13,7 @@ import jsoncEslintParser from 'jsonc-eslint-parser';
  */
 interface SortKeysConfig {
 	pathPattern: string;
-	order:
-		| string[]
-		| { type: 'asc' | 'desc'; caseSensitive?: boolean; natural?: boolean };
+	order: string[];
 }
 
 /**
