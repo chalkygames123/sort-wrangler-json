@@ -10,7 +10,6 @@ import jsoncEslintParser from 'jsonc-eslint-parser';
 
 export interface SortKeysConfig {
 	pathPattern: string;
-	hasProperties?: string[];
 	order:
 		| string[]
 		| { type: 'asc' | 'desc'; caseSensitive?: boolean; natural?: boolean };
@@ -29,6 +28,7 @@ const escapeRegex = (value: string): string =>
 
 const buildPathPattern = (segments: PathSegment[]): string => {
 	if (segments.length === 0) {
+		// Root object: eslint-plugin-jsonc expects '^$' so that the empty path matches the top-level.
 		return '^$';
 	}
 
@@ -248,9 +248,82 @@ export const createSortKeysConfigs = (
 	fullSchema: JSONSchema7,
 ): SortKeysConfig[] => {
 	const configs: SortKeysConfig[] = [];
+	// Prevent duplicate ESLint rules when multiple schema paths resolve to the same pattern.
 	const seenPatterns = new Set<string>();
 
-	const processArray = (schema: JSONSchema7, path: PathSegment[]): void => {
+	const registerObjectConfig = (
+		schema: JSONSchema7,
+		path: PathSegment[],
+	): void => {
+		const propertyNames = Object.keys(schema.properties ?? {});
+
+		if (propertyNames.length === 0) {
+			return;
+		}
+
+		const pattern = buildPathPattern(path);
+
+		if (seenPatterns.has(pattern)) {
+			return;
+		}
+
+		configs.push({
+			pathPattern: pattern,
+			order: generatePropertyOrder(schema),
+		});
+
+		seenPatterns.add(pattern);
+	};
+
+	const traverseObjectProperties = (
+		schema: JSONSchema7,
+		path: PathSegment[],
+	): void => {
+		if (!schema.properties) {
+			return;
+		}
+
+		for (const [propertyName, definition] of Object.entries(
+			schema.properties,
+		)) {
+			const resolvedDefinition = resolveDefinition(fullSchema, definition);
+
+			if (!resolvedDefinition) {
+				continue;
+			}
+
+			traverseSchema(resolvedDefinition, [
+				...path,
+				{ kind: 'literal', value: propertyName },
+			]);
+		}
+	};
+
+	const traverseAdditionalProperties = (
+		schema: JSONSchema7,
+		path: PathSegment[],
+	): void => {
+		if (
+			!schema.additionalProperties ||
+			typeof schema.additionalProperties === 'boolean'
+		) {
+			return;
+		}
+
+		const additional = resolveDefinition(
+			fullSchema,
+			schema.additionalProperties,
+		);
+
+		if (additional) {
+			traverseSchema(additional, [...path, WILDCARD_SEGMENT]);
+		}
+	};
+
+	const traverseArrayItems = (
+		schema: JSONSchema7,
+		path: PathSegment[],
+	): void => {
 		const { items } = schema;
 
 		if (!items) {
@@ -266,89 +339,26 @@ export const createSortKeysConfigs = (
 				continue;
 			}
 
-			processSchema(resolvedItem, [...path, ARRAY_SEGMENT]);
+			traverseSchema(resolvedItem, [...path, ARRAY_SEGMENT]);
 		}
 	};
 
-	const visit = (schema: JSONSchema7, path: PathSegment[]): void => {
+	const traverseSchema = (schema: JSONSchema7, path: PathSegment[]): void => {
 		const resolvedSchema = resolveRefLoop(fullSchema, schema);
 
 		if (hasProperties(resolvedSchema)) {
-			const propertyNames = Object.keys(resolvedSchema.properties);
-
-			if (propertyNames.length > 0) {
-				const pattern = buildPathPattern(path);
-
-				if (!seenPatterns.has(pattern)) {
-					configs.push({
-						pathPattern: pattern,
-						order: generatePropertyOrder(resolvedSchema),
-					});
-
-					seenPatterns.add(pattern);
-				}
-			}
-
-			for (const [propertyName, definition] of Object.entries(
-				resolvedSchema.properties,
-			)) {
-				const resolvedDefinition = resolveDefinition(fullSchema, definition);
-
-				if (!resolvedDefinition) {
-					continue;
-				}
-
-				processSchema(resolvedDefinition, [
-					...path,
-					{ kind: 'literal', value: propertyName },
-				]);
-			}
+			registerObjectConfig(resolvedSchema, path);
+			traverseObjectProperties(resolvedSchema, path);
 		}
 
-		if (
-			resolvedSchema.additionalProperties &&
-			typeof resolvedSchema.additionalProperties !== 'boolean'
-		) {
-			const additional = resolveDefinition(
-				fullSchema,
-				resolvedSchema.additionalProperties,
-			);
-
-			if (additional) {
-				processSchema(additional, [...path, WILDCARD_SEGMENT]);
-			}
-		}
+		traverseAdditionalProperties(resolvedSchema, path);
 
 		if (isArraySchema(resolvedSchema)) {
-			processArray(resolvedSchema, path);
+			traverseArrayItems(resolvedSchema, path);
 		}
 	};
 
-	const processSchema = (schema: JSONSchema7, path: PathSegment[]): void => {
-		const resolvedSchema = resolveRefLoop(fullSchema, schema);
-
-		if (hasProperties(resolvedSchema) || isArraySchema(resolvedSchema)) {
-			visit(resolvedSchema, path);
-
-			return;
-		}
-
-		if (
-			resolvedSchema.additionalProperties &&
-			typeof resolvedSchema.additionalProperties !== 'boolean'
-		) {
-			const additional = resolveDefinition(
-				fullSchema,
-				resolvedSchema.additionalProperties,
-			);
-
-			if (additional) {
-				processSchema(additional, [...path, WILDCARD_SEGMENT]);
-			}
-		}
-	};
-
-	visit(rootSchema, []);
+	traverseSchema(rootSchema, []);
 
 	return configs;
 };
