@@ -2,6 +2,9 @@
 
 A CLI tool to sort Wrangler configuration properties (JSONC format) based on their schema definition while preserving all original comments.
 
+> [!IMPORTANT]
+> This package is not yet published to any registry. You can use it by cloning the repository and installing it by running `pnpm link` in the project root.
+
 ## Features
 
 - Sorts properties in Wrangler configuration files according to the schema order
