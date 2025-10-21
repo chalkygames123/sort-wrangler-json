@@ -247,25 +247,13 @@ describe('sort-wrangler-jsonc', () => {
 
 	describe('integration test', () => {
 		test('should sort unsorted fixture to match sorted fixture', async () => {
-			const originalConfigFilePath = path.join(
+			const configFilePath = path.join(
 				import.meta.dirname,
 				'test/fixtures',
 				'wrangler.original.jsonc',
 			);
-			const expectedConfigFilePath = path.join(
-				import.meta.dirname,
-				'test/fixtures',
-				'wrangler.expected.jsonc',
-			);
-			const originalConfigContent = await readFile(
-				originalConfigFilePath,
-				'utf-8',
-			);
-			const expectedConfigContent = await readFile(
-				expectedConfigFilePath,
-				'utf-8',
-			);
-			const configDirectory = path.dirname(originalConfigFilePath);
+			const configContent = await readFile(configFilePath, 'utf-8');
+			const configDirectory = path.dirname(configFilePath);
 			const schemaFilePath = path.join(
 				import.meta.dirname,
 				'node_modules/wrangler/config-schema.json',
@@ -279,9 +267,19 @@ describe('sort-wrangler-jsonc', () => {
 			const rootSchema = extractRootSchema(schema);
 			const sortKeysConfigs = createSortKeysConfigs(rootSchema, schema);
 			const { output } = await sortJsoncContent(
-				originalConfigContent,
-				originalConfigFilePath,
+				configContent,
+				configFilePath,
 				sortKeysConfigs,
+			);
+
+			const expectedConfigFilePath = path.join(
+				import.meta.dirname,
+				'test/fixtures',
+				'wrangler.expected.jsonc',
+			);
+			const expectedConfigContent = await readFile(
+				expectedConfigFilePath,
+				'utf-8',
 			);
 
 			expect(output).toBe(expectedConfigContent);
