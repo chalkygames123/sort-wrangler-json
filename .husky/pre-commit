@@ -1,1 +1,1 @@
-biome check --staged
+biome check --staged --no-errors-on-unmatched
