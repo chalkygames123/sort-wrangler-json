@@ -179,25 +179,38 @@ describe('sort-wrangler-jsonc', () => {
 			const rootSchema = extractRootSchema(schema);
 			const configs = createSortKeysConfigs(rootSchema, schema);
 
-			const findConfig = (pattern: string) =>
-				configs.find((config) => config.pathPattern === pattern);
+			const ROOT_PATTERN = '^$';
+			const BAR_PATTERN = '^bar$';
+			const BAR_NESTED_PATTERN = '^bar\\.nested$';
+			const BAZ_ITEM_PATTERN = '^baz\\[[0-9]+\\]$';
+			const ENV_ENV_PATTERN = '^env\\.[^.]+$';
+			const ENV_LIST_ITEM_PATTERN = '^env\\.[^.]+\\.list\\[[0-9]+\\]$';
 
-			expect(findConfig('^$')).toMatchObject({
+			const expectConfig = (pattern: string) => {
+				const match = configs.find((config) => config.pathPattern === pattern);
+				expect(match).toBeDefined();
+				if (!match) {
+					throw new Error(`Configuration for pattern ${pattern} not found.`);
+				}
+				return match;
+			};
+
+			expect(expectConfig(ROOT_PATTERN)).toMatchObject({
 				order: ['foo', 'bar', 'baz', 'env'],
 			});
-			expect(findConfig('^bar$')).toMatchObject({
+			expect(expectConfig(BAR_PATTERN)).toMatchObject({
 				order: ['second', 'first', 'nested'],
 			});
-			expect(findConfig('^bar\\.nested$')).toMatchObject({
+			expect(expectConfig(BAR_NESTED_PATTERN)).toMatchObject({
 				order: ['delta', 'alpha'],
 			});
-			expect(findConfig('^baz\\[[0-9]+\\]$')).toMatchObject({
+			expect(expectConfig(BAZ_ITEM_PATTERN)).toMatchObject({
 				order: ['z', 'a'],
 			});
-			expect(findConfig('^env\\.[^.]+$')).toMatchObject({
+			expect(expectConfig(ENV_ENV_PATTERN)).toMatchObject({
 				order: ['gamma', 'beta', 'list', 'nested'],
 			});
-			expect(findConfig('^env\\.[^.]+\\.list\\[[0-9]+\\]$')).toMatchObject({
+			expect(expectConfig(ENV_LIST_ITEM_PATTERN)).toMatchObject({
 				order: ['z', 'a'],
 			});
 		});
@@ -224,15 +237,13 @@ describe('sort-wrangler-jsonc', () => {
 				sortKeysConfigs,
 			);
 
-			expect(sortedContent).toContain('"name"');
-			expect(sortedContent).toContain('"compatibility_date"');
-			expect(sortedContent).toContain('"main"');
-			expect(sortedContent.indexOf('"name"')).toBeLessThan(
-				sortedContent.indexOf('"compatibility_date"'),
-			);
-			expect(sortedContent.indexOf('"compatibility_date"')).toBeLessThan(
-				sortedContent.indexOf('"main"'),
-			);
+			const expected = `{
+	"name": "test",
+	"compatibility_date": "2025-01-01",
+	"main": "index.js"
+}`;
+
+			expect(sortedContent).toBe(expected);
 		});
 	});
 
@@ -251,6 +262,7 @@ describe('sort-wrangler-jsonc', () => {
 
 			const unsortedContent = await readFile(unsortedPath, 'utf-8');
 			const expectedSorted = await readFile(sortedPath, 'utf-8');
+			// Use Wrangler's published schema so this test reflects real-world sorting.
 			const schemaPath = join(
 				import.meta.dirname,
 				'node_modules',
