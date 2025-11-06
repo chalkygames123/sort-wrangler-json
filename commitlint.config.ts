@@ -31,7 +31,7 @@ export default {
 		{
 			rules: {
 				/** Requires or disallows parentheses when the scope is empty. */
-				'custom/scope-empty-parentheses': (
+				'custom/scope-empty-parentheses': ((
 					{ header, scope, type },
 					when = 'never',
 				) => {
@@ -50,7 +50,7 @@ export default {
 						when === 'never' ? !hasHeaderParentheses : hasHeaderParentheses,
 						`header ${when === 'never' ? 'must not' : 'must'} have parentheses when the scope is empty`,
 					];
-				},
+				}) satisfies SyncRule<string[]>,
 				/** Requires or disallows scope to be one of the specified scopes or a combination of them (comma-separated with a space). */
 				'custom/scope-enum': (({ scope }, when = 'always', value = []) => {
 					if (!scope) {
