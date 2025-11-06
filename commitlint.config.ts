@@ -30,7 +30,7 @@ export default {
 	plugins: [
 		{
 			rules: {
-				// Require or disallow parentheses when the scope is empty.
+				/** Requires or disallows parentheses when the scope is empty. */
 				'custom/scope-empty-parentheses': (
 					{ header, scope, type },
 					when = 'never',
@@ -51,7 +51,7 @@ export default {
 						`header ${when === 'never' ? 'must not' : 'must'} have parentheses when the scope is empty`,
 					];
 				},
-				// Require or disallow scope to be one of the provided scopes or a combination of them (comma-separated with a space).
+				/** Requires or disallows scope to be one of the specified scopes or a combination of them (comma-separated with a space). */
 				'custom/scope-enum': (({ scope }, when = 'always', value = []) => {
 					if (!scope) {
 						return [true];
