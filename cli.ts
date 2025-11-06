@@ -9,7 +9,7 @@ import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 import jsoncEslintParser from 'jsonc-eslint-parser';
 
 /**
- * Describes how jsonc/sort-keys should order properties at a given path.
+ * Represents how jsonc/sort-keys should order properties at a given path.
  */
 interface SortKeysConfig {
 	pathPattern: string;
@@ -17,7 +17,7 @@ interface SortKeysConfig {
 }
 
 /**
- * Describes a segment in a property path when deriving jsonc/sort-keys patterns.
+ * Represents a segment in a property path when deriving jsonc/sort-keys patterns.
  */
 type PathSegment =
 	| { kind: 'literal'; value: string }
@@ -25,12 +25,12 @@ type PathSegment =
 	| { kind: 'array' };
 
 /**
- * Represents the path token used for array index lookups.
+ * Defines the path token used for array index lookups.
  */
 const ARRAY_SEGMENT: PathSegment = { kind: 'array' };
 
 /**
- * Represents the path token used for arbitrary property names.
+ * Defines the path token used for arbitrary property names.
  */
 const WILDCARD_SEGMENT: PathSegment = { kind: 'wildcard' };
 
@@ -136,19 +136,19 @@ const isArraySchema = (schema: JSONSchema7): boolean => {
 };
 
 /**
- * Checks if a value is a record.
+ * Checks whether a value is a record.
  *
  * @param value - The value to check.
- * @returns True if the value is a non-null object.
+ * @returns Whether the value is a non-null object.
  */
 const isRecord = (value: unknown): value is Record<string, unknown> =>
 	typeof value === 'object' && value !== null;
 
 /**
- * Checks if a value is a JSONSchema7.
+ * Checks whether a value is a JSONSchema7.
  *
  * @param value - The value to check.
- * @returns True if the value is structurally compatible with JSONSchema7.
+ * @returns Whether the value is structurally compatible with JSONSchema7.
  */
 const isJSONSchema7 = (value: unknown): value is JSONSchema7 => isRecord(value);
 
