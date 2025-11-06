@@ -18,6 +18,7 @@
 		"lint:write": "wireit",
 		"test": "vitest run",
 		"test:watch": "vitest",
+		"type-check": "tsc",
 		"prepare": "husky"
 	},
 	"dependencies": {
