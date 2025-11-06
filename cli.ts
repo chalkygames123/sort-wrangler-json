@@ -490,7 +490,7 @@ const main = async (): Promise<void> => {
 
 	if (showHelp) {
 		console.log(`
-Usage: sort-wrangler-jsonc [options]
+Usage: sort-wrangler-json [options]
 
 Options:
   -c, --config <path>  Path to the configuration file (default: ./wrangler.jsonc)
@@ -499,10 +499,10 @@ Options:
   -h, --help           Display this help message
 
 Examples:
-  sort-wrangler-jsonc                      # Display sorted output
-	sort-wrangler-jsonc -s schema.jsonc      # Use a custom schema file
-  sort-wrangler-jsonc -w                   # Sort and write to default file
-  sort-wrangler-jsonc -c config.jsonc -w   # Sort and write to specified file
+  sort-wrangler-json                      # Display sorted output
+	sort-wrangler-json -s schema.jsonc      # Use a custom schema file
+  sort-wrangler-json -w                   # Sort and write to default file
+  sort-wrangler-json -c config.jsonc -w   # Sort and write to specified file
 `);
 
 		return;

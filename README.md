@@ -1,4 +1,4 @@
-# `sort-wrangler-jsonc`
+# `sort-wrangler-json`
 
 A CLI tool to sort Wrangler configuration properties (JSONC format) based on their schema definition while preserving all original comments.
 
@@ -22,7 +22,7 @@ A CLI tool to sort Wrangler configuration properties (JSONC format) based on the
 Display sorted configuration to stdout:
 
 ```shell
-npx sort-wrangler-jsonc
+npx sort-wrangler-json
 ```
 
 ## Options

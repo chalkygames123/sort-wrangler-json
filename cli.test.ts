@@ -10,7 +10,7 @@ import {
 	sortJsoncContent,
 } from './cli';
 
-describe('sort-wrangler-jsonc', () => {
+describe('sort-wrangler-json', () => {
 	describe('resolveSchemaRef', () => {
 		test('should resolve a schema reference', () => {
 			const schema: JSONSchema7 = {

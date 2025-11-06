@@ -1,5 +1,5 @@
 {
-	"name": "sort-wrangler-jsonc",
+	"name": "sort-wrangler-json",
 	"version": "1.0.0",
 	"description": "An opinionated JSONC sorter for Wrangler configuration files.",
 	"license": "MIT",
