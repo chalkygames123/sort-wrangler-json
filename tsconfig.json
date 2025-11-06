@@ -16,7 +16,7 @@
 		// Modules
 		"module": "preserve",
 		"resolveJsonModule": true,
-		"types": ["json-schema", "node"],
+		"types": ["node"],
 
 		// Emit
 		"noEmit": true,
