@@ -65,10 +65,10 @@ export default {
 					const validationPattern = new RegExp(
 						`^${scopesPattern}(, ${scopesPattern})*$`,
 					);
-					const isValidFormat = validationPattern.test(scope);
+					const isFormatValid = validationPattern.test(scope);
 
 					return [
-						when === 'always' ? isValidFormat : !isValidFormat,
+						when === 'always' ? isFormatValid : !isFormatValid,
 						`scope ${when === 'always' ? 'must' : 'must not'} be one of [${value.join(', ')}], or a combination of them (comma-separated, e.g., "admin, web")`,
 					];
 				}) satisfies SyncRule<string[]>,
