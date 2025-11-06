@@ -57,6 +57,10 @@ export default {
 						return [true];
 					}
 
+					if (value.length === 0) {
+						return [true];
+					}
+
 					const scopesPattern = `(${value.join('|')})`;
 					const validationPattern = new RegExp(
 						`^${scopesPattern}(, ${scopesPattern})*$`,
