@@ -19,7 +19,8 @@
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"type-check": "wireit",
-		"prepare": "husky"
+		"prepare": "husky",
+		"reinstall": "node --eval \"fs.globSync('{**/node_modules/,pnpm-lock{,.*}.yaml}').forEach((path) => fs.rmSync(path, { recursive: true, force: true }))\" && pnpm install"
 	},
 	"dependencies": {
 		"eslint": "9.38.0",
