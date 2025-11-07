@@ -11,7 +11,7 @@
 	"scripts": {
 		"check": "wireit",
 		"check:write": "wireit",
-		"ci": "node --eval \"fs.rmSync('node_modules/', { recursive: true, force: true })\" && pnpm install --frozen-lockfile",
+		"ci": "node --eval \"fs.globSync('**/node_modules/').forEach((path) => fs.rmSync(path, { recursive: true, force: true }))\" && pnpm install --frozen-lockfile",
 		"format": "wireit",
 		"format:write": "wireit",
 		"lint": "wireit",
