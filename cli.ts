@@ -495,8 +495,8 @@ Usage: sort-wrangler-json [options]
 Options:
   -c, --config <path>  Path to the configuration file (default: ./wrangler.jsonc)
 	-s, --schema <path>  Override the schema file path (relative to the configuration file)
-  -w, --write          Write the sorted output to the file
-  -h, --help           Display this help message
+  -w, --write          Write the output to the original file
+  -h, --help           Print help message
 
 Examples:
   sort-wrangler-json                      # Display sorted output
