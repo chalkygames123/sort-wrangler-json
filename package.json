@@ -50,13 +50,6 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"devEngines": {
-		"runtime": {
-			"name": "node",
-			"version": "23.6.1",
-			"onFail": "download"
-		}
-	},
 	"wireit": {
 		"check": {
 			"command": "biome check"

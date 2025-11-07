@@ -2,3 +2,5 @@ ignoredBuiltDependencies:
   - esbuild
   - sharp
   - workerd
+
+useNodeVersion: 23.6.1

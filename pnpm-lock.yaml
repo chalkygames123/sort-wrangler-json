@@ -39,9 +39,6 @@ importers:
       husky:
         specifier: 9.1.7
         version: 9.1.7
-      node:
-        specifier: runtime:23.6.1
-        version: runtime:23.6.1
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -1364,105 +1361,6 @@ packages:
 
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
-
-  node@runtime:23.6.1:
-    resolution:
-      type: variations
-      variants:
-        - resolution:
-            archive: tarball
-            bin: bin/node
-            integrity: sha256-GgW0GTAFqRK5lnTuEZiAjtOziFAiSSiolm4pijO1BHE=
-            type: binary
-            url: https://nodejs.org/download/release/v23.6.1/node-v23.6.1-aix-ppc64.tar.gz
-          targets:
-            - cpu: ppc64
-              os: aix
-        - resolution:
-            archive: tarball
-            bin: bin/node
-            integrity: sha256-uHyQ8e//Py9JBwzkcUoRIopDMxu1kLBvx7yzblMLLqA=
-            type: binary
-            url: https://nodejs.org/download/release/v23.6.1/node-v23.6.1-darwin-arm64.tar.gz
-          targets:
-            - cpu: arm64
-              os: darwin
-        - resolution:
-            archive: tarball
-            bin: bin/node
-            integrity: sha256-vNwpGI8tjXoSm4imwZgwrJHlPmTDdEsY9BLc5TP2fvc=
-            type: binary
-            url: https://nodejs.org/download/release/v23.6.1/node-v23.6.1-darwin-x64.tar.gz
-          targets:
-            - cpu: x64
-              os: darwin
-        - resolution:
-            archive: tarball
-            bin: bin/node
-            integrity: sha256-iyIbte8XPptv7PT8SjFpandbv+B+pF+Me9+I17nJRg8=
-            type: binary
-            url: https://nodejs.org/download/release/v23.6.1/node-v23.6.1-linux-arm64.tar.gz
-          targets:
-            - cpu: arm64
-              os: linux
-        - resolution:
-            archive: tarball
-            bin: bin/node
-            integrity: sha256-O9suMd5EA48WZTHtsvPZkni2w2V2OSxJOXYgKe+lNDk=
-            type: binary
-            url: https://nodejs.org/download/release/v23.6.1/node-v23.6.1-linux-armv7l.tar.gz
-          targets:
-            - cpu: armv7l
-              os: linux
-        - resolution:
-            archive: tarball
-            bin: bin/node
-            integrity: sha256-w9tidnNUDkwf/W8vES5d2ObYnq66T739qpDgccEdWLE=
-            type: binary
-            url: https://nodejs.org/download/release/v23.6.1/node-v23.6.1-linux-ppc64le.tar.gz
-          targets:
-            - cpu: ppc64le
-              os: linux
-        - resolution:
-            archive: tarball
-            bin: bin/node
-            integrity: sha256-aOjC1op0lhaugmBa6Fhxo+KBxq4LaNXLT/poMgyUkQQ=
-            type: binary
-            url: https://nodejs.org/download/release/v23.6.1/node-v23.6.1-linux-s390x.tar.gz
-          targets:
-            - cpu: s390x
-              os: linux
-        - resolution:
-            archive: tarball
-            bin: bin/node
-            integrity: sha256-Cqo3OWY4rm5xr2aSfcxBQUMnBR1agDDTBX2xzrdxmFQ=
-            type: binary
-            url: https://nodejs.org/download/release/v23.6.1/node-v23.6.1-linux-x64.tar.gz
-          targets:
-            - cpu: x64
-              os: linux
-        - resolution:
-            archive: zip
-            bin: node.exe
-            integrity: sha256-dFmcTJxh9mZJeypQHJK0Y1ZmgVh766adpTaLns/eqsU=
-            prefix: node-v23.6.1-win-arm64
-            type: binary
-            url: https://nodejs.org/download/release/v23.6.1/node-v23.6.1-win-arm64.zip
-          targets:
-            - cpu: arm64
-              os: win32
-        - resolution:
-            archive: zip
-            bin: node.exe
-            integrity: sha256-m+j+TrgcYQj/ygZlkMFg2bbJQIDCS036EZ60464Yeqg=
-            prefix: node-v23.6.1-win-x64
-            type: binary
-            url: https://nodejs.org/download/release/v23.6.1/node-v23.6.1-win-x64.zip
-          targets:
-            - cpu: x64
-              os: win32
-    version: 23.6.1
-    hasBin: true
 
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
@@ -3052,8 +2950,6 @@ snapshots:
   nanoid@3.3.11: {}
 
   natural-compare@1.4.0: {}
-
-  node@runtime:23.6.1: {}
 
   normalize-path@3.0.0: {}
 
