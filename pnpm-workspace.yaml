@@ -3,4 +3,10 @@ ignoredBuiltDependencies:
   - sharp
   - workerd
 
+packageManagerStrictVersion: true
+
+strictDepBuilds: true
+
 useNodeVersion: 23.6.1
+
+verifyDepsBeforeRun: prompt
