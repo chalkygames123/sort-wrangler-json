@@ -18,7 +18,7 @@
 		"lint:write": "wireit",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"type-check": "tsc",
+		"type-check": "wireit",
 		"prepare": "husky"
 	},
 	"dependencies": {
@@ -68,6 +68,9 @@
 		},
 		"lint:write": {
 			"command": "biome lint --write --unsafe"
+		},
+		"type-check": {
+			"command": "tsc"
 		}
 	}
 }
