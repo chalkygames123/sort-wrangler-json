@@ -6,10 +6,10 @@
 	"linter": {
 		"rules": {
 			"complexity": {
-				"noForEach": "error"
+				"noForEach": "on"
 			},
 			"nursery": {
-				"useConsistentTypeDefinitions": "error"
+				"useConsistentTypeDefinitions": "on"
 			}
 		}
 	},
