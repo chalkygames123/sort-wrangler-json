@@ -1,18 +1,11 @@
 import { execSync } from 'node:child_process';
-import {
-	RuleConfigSeverity,
-	type SyncRule,
-	type UserConfig,
-} from '@commitlint/types';
+import { RuleConfigSeverity, type SyncRule, type UserConfig } from '@commitlint/types';
 import { z } from 'zod';
 
 const getWorkspacePackages = (): string[] => {
-	const raw = execSync(
-		`pnpm list --recursive --json --depth -1 --filter '!.'`,
-		{
-			encoding: 'utf8',
-		},
-	);
+	const raw = execSync(`pnpm list --recursive --json --depth -1 --filter '!.'`, {
+		encoding: 'utf8',
+	});
 
 	if (!raw) {
 		return [];
@@ -31,10 +24,7 @@ export default {
 		{
 			rules: {
 				/** Requires or disallows parentheses when the scope is empty. */
-				'custom/scope-empty-parentheses': ((
-					{ header, scope, type },
-					when = 'never',
-				) => {
+				'custom/scope-empty-parentheses': (({ header, scope, type }, when = 'never') => {
 					if (scope) {
 						return [true];
 					}
@@ -62,9 +52,7 @@ export default {
 					}
 
 					const scopesPattern = `(${value.join('|')})`;
-					const validationPattern = new RegExp(
-						`^${scopesPattern}(, ${scopesPattern})*$`,
-					);
+					const validationPattern = new RegExp(`^${scopesPattern}(, ${scopesPattern})*$`);
 					const isFormatValid = validationPattern.test(scope);
 
 					return [
@@ -82,10 +70,6 @@ export default {
 		'scope-case': [RuleConfigSeverity.Error, 'always', 'lower-case'],
 		'subject-case': [RuleConfigSeverity.Disabled],
 		'custom/scope-empty-parentheses': [RuleConfigSeverity.Error, 'never'],
-		'custom/scope-enum': [
-			RuleConfigSeverity.Error,
-			'always',
-			[...getWorkspacePackages(), 'deps'],
-		],
+		'custom/scope-enum': [RuleConfigSeverity.Error, 'always', [...getWorkspacePackages(), 'deps']],
 	},
 } satisfies UserConfig;

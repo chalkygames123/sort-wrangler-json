@@ -19,10 +19,7 @@ interface SortKeysConfig {
 /**
  * Represents a segment in a property path when deriving jsonc/sort-keys patterns.
  */
-type PathSegment =
-	| { kind: 'literal'; value: string }
-	| { kind: 'wildcard' }
-	| { kind: 'array' };
+type PathSegment = { kind: 'literal'; value: string } | { kind: 'wildcard' } | { kind: 'array' };
 
 /**
  * Defines the path token used for array index lookups.
@@ -37,8 +34,7 @@ const WILDCARD_SEGMENT: PathSegment = { kind: 'wildcard' };
 /**
  * Escapes characters that have special meaning in regular expressions.
  */
-const escapeRegex = (value: string): string =>
-	value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const escapeRegex = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const formatPathSegment = (segment: PathSegment): string => {
 	switch (segment.kind) {
@@ -100,9 +96,7 @@ const resolveRefLoop = (
 /**
  * Normalizes a schema definition, handling booleans per JSON Schema semantics.
  */
-const resolveDefinition = (
-	definition: JSONSchema7Definition | undefined,
-): JSONSchema7 | null => {
+const resolveDefinition = (definition: JSONSchema7Definition | undefined): JSONSchema7 | null => {
 	if (definition === undefined || definition === false) {
 		return null;
 	}
@@ -141,8 +135,7 @@ const isArraySchema = (schema: JSONSchema7): boolean => {
  * @param value - The value to check.
  * @returns Whether the value is a non-null object.
  */
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-	typeof value === 'object' && value !== null;
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 
 /**
  * Checks whether a value is a JSONSchema7.
@@ -159,10 +152,7 @@ const isJSONSchema7 = (value: unknown): value is JSONSchema7 => isRecord(value);
  * @param ref - The reference string (e.g., "#/definitions/RawConfig").
  * @returns The resolved schema definition.
  */
-export const resolveSchemaRef = (
-	schema: JSONSchema7,
-	ref: string,
-): JSONSchema7 => {
+export const resolveSchemaRef = (schema: JSONSchema7, ref: string): JSONSchema7 => {
 	const refPath = ref.split('/').slice(1);
 	let current: unknown = schema;
 
@@ -175,9 +165,7 @@ export const resolveSchemaRef = (
 	}
 
 	if (!isJSONSchema7(current)) {
-		throw new Error(
-			`Schema reference does not resolve to a valid object: ${ref}`,
-		);
+		throw new Error(`Schema reference does not resolve to a valid object: ${ref}`);
 	}
 
 	return current;
@@ -207,9 +195,7 @@ export const extractRootSchema = (schema: JSONSchema7): JSONSchema7 => {
  * @param ast - The parsed AST of the JSONC file.
  * @returns The value of the $schema property.
  */
-const extractSchemaPath = (
-	ast: ReturnType<typeof jsoncEslintParser.parseForESLint>,
-): string => {
+const extractSchemaPath = (ast: ReturnType<typeof jsoncEslintParser.parseForESLint>): string => {
 	const expressionStatement = ast.ast.body[0];
 
 	if (
@@ -217,16 +203,12 @@ const extractSchemaPath = (
 		expressionStatement.type !== 'JSONExpressionStatement' ||
 		expressionStatement.expression.type !== 'JSONObjectExpression'
 	) {
-		throw new Error(
-			'The configuration file does not contain a valid JSON object.',
-		);
+		throw new Error('The configuration file does not contain a valid JSON object.');
 	}
 
 	const schemaProperty = expressionStatement.expression.properties.find(
 		(prop): prop is jsoncEslintParser.AST.JSONProperty =>
-			prop.type === 'JSONProperty' &&
-			prop.key.type === 'JSONLiteral' &&
-			prop.key.value === '$schema',
+			prop.type === 'JSONProperty' && prop.key.type === 'JSONLiteral' && prop.key.value === '$schema',
 	);
 
 	if (
@@ -234,9 +216,7 @@ const extractSchemaPath = (
 		schemaProperty.value.type !== 'JSONLiteral' ||
 		typeof schemaProperty.value.value !== 'string'
 	) {
-		throw new Error(
-			'The configuration file does not contain a valid $schema property.',
-		);
+		throw new Error('The configuration file does not contain a valid $schema property.');
 	}
 
 	return schemaProperty.value.value;
@@ -256,10 +236,7 @@ export const generatePropertyOrder = (schema: JSONSchema7): string[] => {
 	// Relies on Object.keys preserving declaration order for plain objects, which matches JSON Schema author intent.
 	const allKeys = Object.keys(schema.properties);
 
-	return [
-		...allKeys.filter((key) => key !== 'env'),
-		...(allKeys.includes('env') ? ['env'] : []),
-	];
+	return [...allKeys.filter((key) => key !== 'env'), ...(allKeys.includes('env') ? ['env'] : [])];
 };
 
 /**
@@ -269,18 +246,12 @@ export const generatePropertyOrder = (schema: JSONSchema7): string[] => {
  * @param fullSchema - The original schema containing definitions.
  * @returns An array of sort keys configurations keyed by path pattern.
  */
-export const createSortKeysConfigs = (
-	rootSchema: JSONSchema7,
-	fullSchema: JSONSchema7,
-): SortKeysConfig[] => {
+export const createSortKeysConfigs = (rootSchema: JSONSchema7, fullSchema: JSONSchema7): SortKeysConfig[] => {
 	const configs: SortKeysConfig[] = [];
 	// Prevents duplicate ESLint rules when multiple schema paths resolve to the same pattern.
 	const seenPatterns = new Set<string>();
 
-	const registerObjectConfig = (
-		schema: JSONSchema7,
-		path: PathSegment[],
-	): void => {
+	const registerObjectConfig = (schema: JSONSchema7, path: PathSegment[]): void => {
 		if (!hasProperties(schema)) {
 			return;
 		}
@@ -305,38 +276,24 @@ export const createSortKeysConfigs = (
 		seenPatterns.add(pattern);
 	};
 
-	const traverseObjectProperties = (
-		schema: JSONSchema7,
-		path: PathSegment[],
-	): void => {
+	const traverseObjectProperties = (schema: JSONSchema7, path: PathSegment[]): void => {
 		if (!schema.properties) {
 			return;
 		}
 
-		for (const [propertyName, definition] of Object.entries(
-			schema.properties,
-		)) {
+		for (const [propertyName, definition] of Object.entries(schema.properties)) {
 			const resolvedDefinition = resolveDefinition(definition);
 
 			if (!resolvedDefinition) {
 				continue;
 			}
 
-			traverseSchema(resolvedDefinition, [
-				...path,
-				{ kind: 'literal', value: propertyName },
-			]);
+			traverseSchema(resolvedDefinition, [...path, { kind: 'literal', value: propertyName }]);
 		}
 	};
 
-	const traverseAdditionalProperties = (
-		schema: JSONSchema7,
-		path: PathSegment[],
-	): void => {
-		if (
-			!schema.additionalProperties ||
-			typeof schema.additionalProperties === 'boolean'
-		) {
+	const traverseAdditionalProperties = (schema: JSONSchema7, path: PathSegment[]): void => {
+		if (!schema.additionalProperties || typeof schema.additionalProperties === 'boolean') {
 			return;
 		}
 
@@ -347,10 +304,7 @@ export const createSortKeysConfigs = (
 		}
 	};
 
-	const traverseArrayItems = (
-		schema: JSONSchema7,
-		path: PathSegment[],
-	): void => {
+	const traverseArrayItems = (schema: JSONSchema7, path: PathSegment[]): void => {
 		const { items } = schema;
 
 		if (!items) {
@@ -456,12 +410,7 @@ export const sortJsoncContent = async (
  */
 const main = async (): Promise<void> => {
 	const {
-		values: {
-			config: configFilePath,
-			schema: schemaFilePathOverride,
-			write: shouldWrite,
-			help: showHelp,
-		},
+		values: { config: configFilePath, schema: schemaFilePathOverride, write: shouldWrite, help: showHelp },
 	} = parseArgs({
 		options: {
 			config: {
@@ -521,11 +470,7 @@ Examples:
 	const schema: JSONSchema7 = JSON.parse(schemaContent);
 	const rootSchema = extractRootSchema(schema);
 	const sortKeysConfigs = createSortKeysConfigs(rootSchema, schema);
-	const { output } = await sortJsoncContent(
-		configContent,
-		configFilePath,
-		sortKeysConfigs,
-	);
+	const { output } = await sortJsoncContent(configContent, configFilePath, sortKeysConfigs);
 
 	if (shouldWrite) {
 		await writeFile(configFilePath, output, 'utf-8');

@@ -80,9 +80,7 @@ describe('sort-wrangler-json', () => {
 		test('should throw an error when properties cannot be extracted', () => {
 			const schema: JSONSchema7 = {};
 
-			expect(() => extractRootSchema(schema)).toThrow(
-				'Unable to extract properties from the schema.',
-			);
+			expect(() => extractRootSchema(schema)).toThrow('Unable to extract properties from the schema.');
 		});
 	});
 
@@ -118,9 +116,7 @@ describe('sort-wrangler-json', () => {
 		test('should throw an error when properties do not exist', () => {
 			const schema: JSONSchema7 = {};
 
-			expect(() => generatePropertyOrder(schema)).toThrow(
-				'The root schema does not contain any properties.',
-			);
+			expect(() => generatePropertyOrder(schema)).toThrow('The root schema does not contain any properties.');
 		});
 	});
 
@@ -230,11 +226,7 @@ describe('sort-wrangler-json', () => {
 					order: ['name', 'compatibility_date', 'main'],
 				},
 			];
-			const { output } = await sortJsoncContent(
-				content,
-				filePath,
-				sortKeysConfigs,
-			);
+			const { output } = await sortJsoncContent(content, filePath, sortKeysConfigs);
 			const expected = `{
 	"name": "test",
 	"compatibility_date": "2025-01-01",
@@ -247,40 +239,19 @@ describe('sort-wrangler-json', () => {
 
 	describe('integration test', () => {
 		test('should sort unsorted fixture to match sorted fixture', async () => {
-			const configFilePath = path.join(
-				import.meta.dirname,
-				'test/fixtures',
-				'wrangler.original.jsonc',
-			);
+			const configFilePath = path.join(import.meta.dirname, 'test/fixtures', 'wrangler.original.jsonc');
 			const configContent = await readFile(configFilePath, 'utf-8');
 			const configDirectory = path.dirname(configFilePath);
-			const schemaFilePath = path.join(
-				import.meta.dirname,
-				'node_modules/wrangler/config-schema.json',
-			);
-			const schemaFilePathAbsolute = path.resolve(
-				configDirectory,
-				path.relative(configDirectory, schemaFilePath),
-			);
+			const schemaFilePath = path.join(import.meta.dirname, 'node_modules/wrangler/config-schema.json');
+			const schemaFilePathAbsolute = path.resolve(configDirectory, path.relative(configDirectory, schemaFilePath));
 			const schemaContent = await readFile(schemaFilePathAbsolute, 'utf-8');
 			const schema: JSONSchema7 = JSON.parse(schemaContent);
 			const rootSchema = extractRootSchema(schema);
 			const sortKeysConfigs = createSortKeysConfigs(rootSchema, schema);
-			const { output } = await sortJsoncContent(
-				configContent,
-				configFilePath,
-				sortKeysConfigs,
-			);
+			const { output } = await sortJsoncContent(configContent, configFilePath, sortKeysConfigs);
 
-			const expectedConfigFilePath = path.join(
-				import.meta.dirname,
-				'test/fixtures',
-				'wrangler.expected.jsonc',
-			);
-			const expectedConfigContent = await readFile(
-				expectedConfigFilePath,
-				'utf-8',
-			);
+			const expectedConfigFilePath = path.join(import.meta.dirname, 'test/fixtures', 'wrangler.expected.jsonc');
+			const expectedConfigContent = await readFile(expectedConfigFilePath, 'utf-8');
 
 			expect(output).toBe(expectedConfigContent);
 		});
