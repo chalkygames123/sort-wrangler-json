@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { ESLint, type Linter } from 'eslint';
@@ -462,7 +462,22 @@ Examples:
 	}
 
 	if (cwdOption) {
-		process.chdir(cwdOption);
+		try {
+			const cwdAbsolute = path.resolve(cwdOption);
+			const stats = await stat(cwdAbsolute);
+
+			if (!stats.isDirectory()) {
+				throw new Error(`The path "${cwdAbsolute}" is not a directory.`);
+			}
+
+			process.chdir(cwdAbsolute);
+		} catch (error) {
+			if (error instanceof Error) {
+				throw new Error(`Failed to change directory to "${cwdOption}": ${error.message}`);
+			}
+
+			throw error;
+		}
 	}
 
 	const configFilePath = positionals[0] ?? './wrangler.jsonc';
