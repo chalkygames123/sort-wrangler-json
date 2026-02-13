@@ -473,7 +473,7 @@ Examples:
 
 			process.chdir(cwdAbsolute);
 		} catch (error) {
-			if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+			if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
 				throw new Error(`Directory not found: ${cwdAbsolute}`);
 			}
 
