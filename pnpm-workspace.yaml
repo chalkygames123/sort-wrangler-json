@@ -7,6 +7,6 @@ packageManagerStrictVersion: true
 
 strictDepBuilds: true
 
-useNodeVersion: 23.6.1
+useNodeVersion: 25.6.1
 
 verifyDepsBeforeRun: prompt
