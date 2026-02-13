@@ -410,14 +410,10 @@ export const sortJsoncContent = async (
  */
 const main = async (): Promise<void> => {
 	const {
-		values: { config: configFilePath, schema: schemaFilePathOverride, write: shouldWrite, help: showHelp },
+		values: { schema: schemaFilePathOverride, write: shouldWrite, help: showHelp },
+		positionals,
 	} = parseArgs({
 		options: {
-			config: {
-				type: 'string',
-				short: 'c',
-				default: './wrangler.jsonc',
-			},
 			schema: {
 				type: 'string',
 				short: 's',
@@ -434,24 +430,28 @@ const main = async (): Promise<void> => {
 			},
 		},
 		strict: true,
-		allowPositionals: false,
+		allowPositionals: true,
 	});
+
+	const configFilePath = positionals[0] ?? './wrangler.jsonc';
 
 	if (showHelp) {
 		console.log(`
-Usage: sort-wrangler-json [options]
+Usage: sort-wrangler-json [config] [options]
+
+Arguments:
+  config               Path to the configuration file (default: ./wrangler.jsonc)
 
 Options:
-  -c, --config <path>  Path to the configuration file (default: ./wrangler.jsonc)
-	-s, --schema <path>  Override the schema file path (relative to the configuration file)
+  -s, --schema <path>  Override the schema file path (relative to the configuration file)
   -w, --write          Write the output to the original file
   -h, --help           Print help message
 
 Examples:
   sort-wrangler-json                      # Display sorted output
-	sort-wrangler-json -s schema.jsonc      # Use a custom schema file
+  sort-wrangler-json -s schema.jsonc      # Use a custom schema file
   sort-wrangler-json -w                   # Sort and write to default file
-  sort-wrangler-json -c config.jsonc -w   # Sort and write to specified file
+  sort-wrangler-json config.jsonc -w      # Sort and write to specified file
 `);
 
 		return;
