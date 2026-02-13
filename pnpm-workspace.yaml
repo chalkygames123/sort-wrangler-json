@@ -1,12 +1,20 @@
-ignoredBuiltDependencies:
-  - esbuild
-  - sharp
-  - workerd
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true
 
-packageManagerStrictVersion: true
+blockExoticSubdeps: true
+
+catalogMode: strict
+
+cleanupUnusedCatalogs: true
+
+minimumReleaseAge: 1440
+
+optimisticRepeatInstall: true
 
 strictDepBuilds: true
 
 useNodeVersion: 25.6.1
 
-verifyDepsBeforeRun: prompt
+verifyDepsBeforeRun: warn
