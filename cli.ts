@@ -468,12 +468,12 @@ Examples:
 			const stats = await stat(cwdAbsolute);
 
 			if (!stats.isDirectory()) {
-				throw new Error(`Path is not a directory: ${cwdAbsolute}`);
+				throw new Error(`Path is not a directory: ${cwdAbsolute}. Please provide a valid directory path.`);
 			}
 
 			process.chdir(cwdAbsolute);
 		} catch (error) {
-			if (error instanceof Error && error.message.includes('ENOENT')) {
+			if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
 				throw new Error(`Directory not found: ${cwdAbsolute}`);
 			}
 
