@@ -410,10 +410,14 @@ export const sortJsoncContent = async (
  */
 const main = async (): Promise<void> => {
 	const {
-		values: { schema: schemaFilePathOverride, write: shouldWrite, help: showHelp, cwd: cwdOption },
+		values: { cwd: cwdOption, schema: schemaFilePathOverride, write: shouldWrite, help: showHelp },
 		positionals,
 	} = parseArgs({
 		options: {
+			cwd: {
+				type: 'string',
+				short: 'c',
+			},
 			schema: {
 				type: 'string',
 				short: 's',
@@ -427,10 +431,6 @@ const main = async (): Promise<void> => {
 				type: 'boolean',
 				short: 'h',
 				default: false,
-			},
-			cwd: {
-				type: 'string',
-				short: 'c',
 			},
 		},
 		strict: true,
