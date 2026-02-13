@@ -413,7 +413,7 @@ export const sortJsoncContent = async (
  */
 const main = async (): Promise<void> => {
 	const {
-		values: { cwd: cwdOption, schema: schemaFilePathOverride, write: shouldWrite, help: showHelp },
+		values: { cwd: cwdPath, schema: schemaFilePathOverride, write: shouldWrite, help: showHelp },
 		positionals,
 	} = parseArgs({
 		options: {
@@ -464,20 +464,20 @@ Examples:
 		return;
 	}
 
-	if (cwdOption) {
-		const cwdAbsolute = path.resolve(cwdOption);
+	if (cwdPath) {
+		const cwdPathAbsolute = path.resolve(cwdPath);
 
 		try {
-			const stats = await stat(cwdAbsolute);
+			const stats = await stat(cwdPathAbsolute);
 
 			if (!stats.isDirectory()) {
-				throw new Error(`Path is not a directory: ${cwdAbsolute}`);
+				throw new Error(`Path is not a directory: ${cwdPathAbsolute}`);
 			}
 
-			process.chdir(cwdAbsolute);
+			process.chdir(cwdPathAbsolute);
 		} catch (error) {
 			if (isNativeError(error) && error.code === 'ENOENT') {
-				throw new Error(`Directory not found: ${cwdAbsolute}`);
+				throw new Error(`Directory not found: ${cwdPathAbsolute}`);
 			}
 
 			throw error;
