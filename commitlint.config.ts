@@ -3,9 +3,7 @@ import { RuleConfigSeverity, type SyncRule, type UserConfig } from '@commitlint/
 import { z } from 'zod';
 
 const getWorkspacePackages = (): string[] => {
-	const raw = execSync(`pnpm list --recursive --json --depth -1 --filter '!.'`, {
-		encoding: 'utf8',
-	});
+	const raw = execSync("pnpm list --recursive --json --depth -1 --filter '!.'", { encoding: 'utf8' });
 
 	if (!raw) {
 		return [];
