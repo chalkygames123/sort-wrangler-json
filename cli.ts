@@ -468,7 +468,7 @@ Examples:
 			const stats = await stat(cwdAbsolute);
 
 			if (!stats.isDirectory()) {
-				throw new Error(`Path is not a directory: ${cwdAbsolute}. Please provide a valid directory path.`);
+				throw new Error(`Path is not a directory: ${cwdAbsolute}`);
 			}
 
 			process.chdir(cwdAbsolute);
