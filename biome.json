@@ -3,6 +3,9 @@
 	"files": {
 		"includes": ["**"]
 	},
+	"formatter": {
+		"lineWidth": 120
+	},
 	"linter": {
 		"rules": {
 			"complexity": {
