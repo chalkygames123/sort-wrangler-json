@@ -51,7 +51,7 @@ export default {
 						`header ${when === 'never' ? 'must not' : 'must'} have parentheses when the scope is empty`,
 					];
 				}) satisfies SyncRule<string[]>,
-				/** Requires or disallows scope to be one of the specified scopes or a combination of them (comma-separated with a space). */
+				/** Requires or disallows the scope to be one of the specified scopes or a combination of them (comma-separated with a space). */
 				'custom/scope-enum': (({ scope }, when = 'always', value = []) => {
 					if (!scope) {
 						return [true];
