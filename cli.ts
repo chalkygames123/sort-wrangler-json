@@ -462,18 +462,19 @@ Examples:
 	}
 
 	if (cwdOption) {
+		const cwdAbsolute = path.resolve(cwdOption);
+
 		try {
-			const cwdAbsolute = path.resolve(cwdOption);
 			const stats = await stat(cwdAbsolute);
 
 			if (!stats.isDirectory()) {
-				throw new Error(`The path "${cwdAbsolute}" is not a directory.`);
+				throw new Error(`Path is not a directory: ${cwdAbsolute}`);
 			}
 
 			process.chdir(cwdAbsolute);
 		} catch (error) {
-			if (error instanceof Error) {
-				throw new Error(`Failed to change directory to "${cwdOption}": ${error.message}`);
+			if (error instanceof Error && error.message.includes('ENOENT')) {
+				throw new Error(`Directory not found: ${cwdAbsolute}`);
 			}
 
 			throw error;
