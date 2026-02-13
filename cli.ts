@@ -529,8 +529,6 @@ Examples:
 
 	if (shouldWrite) {
 		await writeFile(configFilePath, output, 'utf-8');
-
-		console.log(`Successfully sorted and wrote to ${configFilePath}.`);
 	} else {
 		process.stdout.write(output);
 	}
