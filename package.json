@@ -18,7 +18,7 @@
 		"lint:write": "wireit",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"type-check": "wireit",
+		"types:check": "wireit",
 		"prepare": "husky",
 		"reinstall": "node --eval \"fs.globSync('{**/node_modules/,pnpm-lock{,.*}.yaml}').forEach((path) => fs.rmSync(path, { recursive: true, force: true }))\" && pnpm install"
 	},
@@ -70,7 +70,7 @@
 		"lint:write": {
 			"command": "biome lint --write --unsafe"
 		},
-		"type-check": {
+		"types:check": {
 			"command": "tsc"
 		}
 	}
