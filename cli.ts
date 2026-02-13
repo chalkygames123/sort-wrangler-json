@@ -8,6 +8,9 @@ import eslintPluginJsonc from 'eslint-plugin-jsonc';
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 import jsoncEslintParser from 'jsonc-eslint-parser';
 
+const isNativeError = (error: unknown): error is NodeJS.ErrnoException =>
+	Error.isError(error) && 'code' in error && typeof error.code === 'string';
+
 /**
  * Represents how jsonc/sort-keys should order properties at a given path.
  */
@@ -473,7 +476,7 @@ Examples:
 
 			process.chdir(cwdAbsolute);
 		} catch (error) {
-			if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+			if (isNativeError(error) && error.code === 'ENOENT') {
 				throw new Error(`Directory not found: ${cwdAbsolute}`);
 			}
 
