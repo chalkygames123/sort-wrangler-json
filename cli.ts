@@ -410,7 +410,7 @@ export const sortJsoncContent = async (
  */
 const main = async (): Promise<void> => {
 	const {
-		values: { schema: schemaFilePathOverride, write: shouldWrite, help: showHelp },
+		values: { schema: schemaFilePathOverride, write: shouldWrite, help: showHelp, cwd: cwdOption },
 		positionals,
 	} = parseArgs({
 		options: {
@@ -428,12 +428,14 @@ const main = async (): Promise<void> => {
 				short: 'h',
 				default: false,
 			},
+			cwd: {
+				type: 'string',
+				short: 'c',
+			},
 		},
 		strict: true,
 		allowPositionals: true,
 	});
-
-	const configFilePath = positionals[0] ?? './wrangler.jsonc';
 
 	if (showHelp) {
 		console.log(`
@@ -443,6 +445,7 @@ Arguments:
   config               Path to the configuration file (default: ./wrangler.jsonc)
 
 Options:
+  -c, --cwd <path>     Change the current working directory
   -s, --schema <path>  Override the schema file path (relative to the configuration file)
   -w, --write          Write the output to the original file
   -h, --help           Print help message
@@ -452,10 +455,17 @@ Examples:
   sort-wrangler-json -s schema.jsonc      # Use a custom schema file
   sort-wrangler-json -w                   # Sort and write to default file
   sort-wrangler-json config.jsonc -w      # Sort and write to specified file
+  sort-wrangler-json -c ./my-project      # Run from a different directory
 `);
 
 		return;
 	}
+
+	if (cwdOption) {
+		process.chdir(cwdOption);
+	}
+
+	const configFilePath = positionals[0] ?? './wrangler.jsonc';
 
 	const configContent = await readFile(configFilePath, 'utf-8');
 	const ast = jsoncEslintParser.parseForESLint(configContent, {
