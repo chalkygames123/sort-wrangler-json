@@ -26,6 +26,7 @@ npx sort-wrangler-json
 | Option            | Short | Type    | Description                           | Default            |
 | ----------------- | ----- | ------- | ------------------------------------- | ------------------ |
 | `<config>`        |       | string  | Path to the configuration file        | `./wrangler.jsonc` |
+| `--cwd <path>`    | `-c`  | string  | Change the current working directory  | `undefined`        |
 | `--schema <path>` | `-s`  | string  | Override the schema file path         | `undefined`        |
 | `--write`         | `-w`  | boolean | Write the output to the original file | `false`            |
 | `--help`          | `-h`  | boolean | Print help message                    | `false`            |

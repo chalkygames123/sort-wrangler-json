@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { ESLint, type Linter } from 'eslint';
 import eslintPluginJsonc from 'eslint-plugin-jsonc';
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 import jsoncEslintParser from 'jsonc-eslint-parser';
+
+const isNativeError = (error: unknown): error is NodeJS.ErrnoException =>
+	Error.isError(error) && 'code' in error && typeof error.code === 'string';
 
 /**
  * Represents how jsonc/sort-keys should order properties at a given path.
@@ -410,10 +413,14 @@ export const sortJsoncContent = async (
  */
 const main = async (): Promise<void> => {
 	const {
-		values: { schema: schemaFilePathOverride, write: shouldWrite, help: showHelp },
+		values: { cwd: cwdPath, schema: schemaFilePathOverride, write: shouldWrite, help: showHelp },
 		positionals,
 	} = parseArgs({
 		options: {
+			cwd: {
+				type: 'string',
+				short: 'c',
+			},
 			schema: {
 				type: 'string',
 				short: 's',
@@ -433,8 +440,6 @@ const main = async (): Promise<void> => {
 		allowPositionals: true,
 	});
 
-	const configFilePath = positionals[0] ?? './wrangler.jsonc';
-
 	if (showHelp) {
 		console.log(`
 Usage: sort-wrangler-json [config] [options]
@@ -443,6 +448,7 @@ Arguments:
   config               Path to the configuration file (default: ./wrangler.jsonc)
 
 Options:
+  -c, --cwd <path>     Change the current working directory
   -s, --schema <path>  Override the schema file path (relative to the configuration file)
   -w, --write          Write the output to the original file
   -h, --help           Print help message
@@ -452,10 +458,33 @@ Examples:
   sort-wrangler-json -s schema.jsonc      # Use a custom schema file
   sort-wrangler-json -w                   # Sort and write to default file
   sort-wrangler-json config.jsonc -w      # Sort and write to specified file
+  sort-wrangler-json -c ./my-project      # Run from a different directory
 `);
 
 		return;
 	}
+
+	if (cwdPath) {
+		const cwdPathAbsolute = path.resolve(cwdPath);
+
+		try {
+			const stats = await stat(cwdPathAbsolute);
+
+			if (!stats.isDirectory()) {
+				throw new Error(`Path is not a directory: ${cwdPathAbsolute}`);
+			}
+
+			process.chdir(cwdPathAbsolute);
+		} catch (error) {
+			if (isNativeError(error) && error.code === 'ENOENT') {
+				throw new Error(`Directory not found: ${cwdPathAbsolute}`);
+			}
+
+			throw error;
+		}
+	}
+
+	const configFilePath = positionals[0] ?? './wrangler.jsonc';
 
 	const configContent = await readFile(configFilePath, 'utf-8');
 	const ast = jsoncEslintParser.parseForESLint(configContent, {
