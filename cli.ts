@@ -445,13 +445,13 @@ const main = async (): Promise<void> => {
 Usage: sort-wrangler-json [config] [options]
 
 Arguments:
-  config               Path to the configuration file (default: ./wrangler.jsonc)
+  config               Path to the configuration file to sort
 
 Options:
-  -c, --cwd <path>     Change the current working directory
-  -s, --schema <path>  Override the schema file path (relative to the configuration file)
-  -w, --write          Write the output to the original file
-  -h, --help           Print help message
+  -c, --cwd <path>     Directory to run the command from (relative to the current working directory)
+  -s, --schema <path>  Path to the schema file to override (relative to the configuration file)
+  -w, --write          Whether to write the sorted output back to the file instead of stdout
+  -h, --help           Whether to print the help message
 
 Examples:
   sort-wrangler-json                      # Display sorted output
