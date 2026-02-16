@@ -409,7 +409,7 @@ export const sortJsoncContent = async (
 };
 
 /**
- * Serves as the main entry point for CLI execution.
+ * Serves as the entry point for the CLI run.
  */
 const main = async (): Promise<void> => {
 	const {
@@ -508,7 +508,7 @@ Examples:
 	}
 };
 
-// Runs main only when the file executes as a script (not when imported as a module).
+// Invokes the entry point only if this file is run directly, allowing for testing of exports without executing the CLI logic.
 if (import.meta.url === `file://${process.argv[1]}`) {
 	main().catch((error) => {
 		console.error('Error:', error instanceof Error ? error.message : error);
