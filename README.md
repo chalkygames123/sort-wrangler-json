@@ -18,18 +18,23 @@ A CLI tool to sort Wrangler configuration files written in JSON format (`wrangle
 Print the output of the sorting result to stdout:
 
 ```shell
-npx sort-wrangler-json
+npx sort-wrangler-json [<CONFIG>] [OPTIONS]
 ```
 
-## Options
+### Parameters
 
-| Option            | Short | Type    | Description                           | Default            |
-| ----------------- | ----- | ------- | ------------------------------------- | ------------------ |
-| `<config>`        |       | string  | Path to the configuration file        | `./wrangler.jsonc` |
-| `--cwd <path>`    | `-c`  | string  | Change the current working directory  | `undefined`        |
-| `--schema <path>` | `-s`  | string  | Override the schema file path         | `undefined`        |
-| `--write`         | `-w`  | boolean | Write the output to the original file | `false`            |
-| `--help`          | `-h`  | boolean | Print help message                    | `false`            |
+| Parameter  | Type   | Description                            | Default            |
+| ---------- | ------ | -------------------------------------- | ------------------ |
+| `<CONFIG>` | string | Path to the configuration file to sort | `./wrangler.jsonc` |
+
+### Options
+
+| Option         | Type    | Description                                                                   | Default     |
+| -------------- | ------- | ----------------------------------------------------------------------------- | ----------- |
+| `-c, --cwd`    | string  | Directory to run the command from (relative to the current working directory) | `undefined` |
+| `-s, --schema` | string  | Path to the schema file to override (relative to the configuration file)      | `undefined` |
+| `-w, --write`  | boolean | Whether to write the sorted output back to the file instead of stdout         | `false`     |
+| `-h, --help`   | boolean | Whether to print the help message                                             | `false`     |
 
 ## How It Works
 
