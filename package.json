@@ -11,7 +11,6 @@
 	"scripts": {
 		"check": "wireit",
 		"check:write": "wireit",
-		"ci": "node --eval \"fs.globSync('**/node_modules/').forEach((path) => fs.rmSync(path, { recursive: true, force: true }))\" && pnpm install --frozen-lockfile",
 		"format": "wireit",
 		"format:write": "wireit",
 		"lint": "wireit",
@@ -20,7 +19,7 @@
 		"test:watch": "vitest",
 		"types:check": "wireit",
 		"prepare": "husky",
-		"reinstall": "node --eval \"fs.globSync('{**/node_modules/,pnpm-lock{,.*}.yaml}').forEach((path) => fs.rmSync(path, { recursive: true, force: true }))\" && pnpm install"
+		"reinstall": "pnpm clean && pnpm install"
 	},
 	"dependencies": {
 		"eslint": "9.38.0",
@@ -44,7 +43,18 @@
 	"peerDependencies": {
 		"eslint": "^9.0.0"
 	},
-	"packageManager": "pnpm@10.29.3",
+	"devEngines": {
+		"packageManager": {
+			"name": "pnpm",
+			"version": "^11.0.0",
+			"onFail": "download"
+		},
+		"runtime": {
+			"name": "node",
+			"version": "25.6.1",
+			"onFail": "download"
+		}
+	},
 	"engines": {
 		"node": ">=23.6.0"
 	},

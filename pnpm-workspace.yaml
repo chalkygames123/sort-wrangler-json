@@ -3,22 +3,12 @@ allowBuilds:
   sharp: false
   workerd: false
 
-blockExoticSubdeps: true
-
 catalogMode: strict
 
 cleanupUnusedCatalogs: true
 
-minimumReleaseAge: 1440
-
-optimisticRepeatInstall: true
-
-strictDepBuilds: true
+saveExact: true
 
 trustPolicy: no-downgrade
 
 trustPolicyIgnoreAfter: 1440
-
-useNodeVersion: 25.6.1
-
-verifyDepsBeforeRun: warn
