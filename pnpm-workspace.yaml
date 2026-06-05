@@ -15,6 +15,10 @@ optimisticRepeatInstall: true
 
 strictDepBuilds: true
 
+trustPolicy: no-downgrade
+
+trustPolicyIgnoreAfter: 1440
+
 useNodeVersion: 25.6.1
 
 verifyDepsBeforeRun: warn
