@@ -3,7 +3,7 @@
 A CLI tool to sort Wrangler configuration files written in JSON format (`wrangler.json` or `wrangler.jsonc`) based on their schema definition while preserving all original comments.
 
 > [!IMPORTANT]
-> This package is not yet published to any registry. You can use it by cloning the repository and installing it by running `pnpm link` in the project root.
+> This package is not yet published to any registry. You can use it by cloning the repository and installing it by running `pnpm install && pnpm add --global .` in the project root.
 
 ## Features
 
