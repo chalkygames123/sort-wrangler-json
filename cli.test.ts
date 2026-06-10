@@ -1,4 +1,6 @@
-import { readFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+import { mkdtemp, readFile, rm, symlink } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import type { JSONSchema7 } from 'json-schema';
 import { describe, expect, test } from 'vitest';
@@ -254,6 +256,25 @@ describe('sort-wrangler-json', () => {
 			const expectedConfigContent = await readFile(expectedConfigFilePath, 'utf-8');
 
 			expect(output).toBe(expectedConfigContent);
+		});
+
+		test('should run when invoked through a symlinked entry point', async () => {
+			const temporaryDirectory = await mkdtemp(path.join(tmpdir(), 'sort-wrangler-json-'));
+			const symlinkedCliPath = path.join(temporaryDirectory, 'cli.ts');
+
+			await symlink(path.join(import.meta.dirname, 'cli.ts'), symlinkedCliPath);
+
+			try {
+				const result = spawnSync(process.execPath, [symlinkedCliPath, '--help'], {
+					encoding: 'utf8',
+				});
+
+				expect(result.status).toBe(0);
+				expect(result.stderr).toBe('');
+				expect(result.stdout).toContain('Usage: sort-wrangler-json');
+			} finally {
+				await rm(temporaryDirectory, { recursive: true, force: true });
+			}
 		});
 	});
 });

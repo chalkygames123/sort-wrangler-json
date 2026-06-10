@@ -508,8 +508,8 @@ Examples:
 	}
 };
 
-// Invokes the entry point only if this file is run directly, allowing for testing of exports without executing the CLI logic.
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Invokes the entry point only when Node marks this module as the main entry, which remains correct through symlinks.
+if (import.meta.main) {
 	main().catch((error) => {
 		console.error('Error:', error instanceof Error ? error.message : error);
 
