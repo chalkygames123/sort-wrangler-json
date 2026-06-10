@@ -212,6 +212,61 @@ describe('sort-wrangler-json', () => {
 				order: ['z', 'a'],
 			});
 		});
+
+		test('should stop descending when schema definitions are recursive', () => {
+			const schema: JSONSchema7 = {
+				definitions: {
+					RecursiveConfig: {
+						type: 'object',
+						properties: {
+							name: { type: 'string' },
+							child: { $ref: '#/definitions/NestedConfig' },
+						},
+					},
+					NestedConfig: {
+						type: 'object',
+						properties: {
+							enabled: { type: 'boolean' },
+							recursive: { $ref: '#/definitions/RecursiveConfig' },
+						},
+					},
+				},
+				properties: {
+					previews: { $ref: '#/definitions/RecursiveConfig' },
+				},
+			};
+
+			const rootSchema = extractRootSchema(schema);
+			const configs = createSortKeysConfigs(rootSchema, schema);
+
+			expect(configs).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						pathPattern: '^$',
+						order: ['previews'],
+					}),
+					expect.objectContaining({
+						pathPattern: '^previews$',
+						order: ['name', 'child'],
+					}),
+					expect.objectContaining({
+						pathPattern: '^previews\\.child$',
+						order: ['enabled', 'recursive'],
+					}),
+					expect.objectContaining({
+						pathPattern: '^previews\\.child\\.recursive$',
+						order: ['name', 'child'],
+					}),
+				]),
+			);
+			expect(configs).not.toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						pathPattern: '^previews\\.child\\.recursive\\.child$',
+					}),
+				]),
+			);
+		});
 	});
 
 	describe('sortJsoncContent', () => {

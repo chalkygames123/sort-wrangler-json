@@ -253,6 +253,8 @@ export const createSortKeysConfigs = (rootSchema: JSONSchema7, fullSchema: JSONS
 	const configs: SortKeysConfig[] = [];
 	// Prevents duplicate ESLint rules when multiple schema paths resolve to the same pattern.
 	const seenPatterns = new Set<string>();
+	// Prevents infinite recursion when the schema graph contains cycles.
+	const activeSchemas = new Set<JSONSchema7>();
 
 	const registerObjectConfig = (schema: JSONSchema7, path: PathSegment[]): void => {
 		if (!hasProperties(schema)) {
@@ -329,16 +331,30 @@ export const createSortKeysConfigs = (rootSchema: JSONSchema7, fullSchema: JSONS
 
 	const traverseSchema = (schema: JSONSchema7, path: PathSegment[]): void => {
 		const resolvedSchema = resolveRefLoop(fullSchema, schema);
+		const isRecursivePath = activeSchemas.has(resolvedSchema);
 
 		if (hasProperties(resolvedSchema)) {
 			registerObjectConfig(resolvedSchema, path);
-			traverseObjectProperties(resolvedSchema, path);
 		}
 
-		traverseAdditionalProperties(resolvedSchema, path);
+		if (isRecursivePath) {
+			return;
+		}
 
-		if (isArraySchema(resolvedSchema)) {
-			traverseArrayItems(resolvedSchema, path);
+		activeSchemas.add(resolvedSchema);
+
+		try {
+			if (hasProperties(resolvedSchema)) {
+				traverseObjectProperties(resolvedSchema, path);
+			}
+
+			traverseAdditionalProperties(resolvedSchema, path);
+
+			if (isArraySchema(resolvedSchema)) {
+				traverseArrayItems(resolvedSchema, path);
+			}
+		} finally {
+			activeSchemas.delete(resolvedSchema);
 		}
 	};
 
