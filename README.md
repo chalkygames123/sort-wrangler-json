@@ -50,7 +50,7 @@ The tool supports `.json` and `.jsonc` files. If you omit `<CONFIG>`, the tool u
 
 | Option       | Type    | Description                                      | Default                           |
 | ------------ | ------- | ------------------------------------------------ | --------------------------------- |
-| `--cwd`      | string  | Set the directory for this command               | Current working directory         |
+| `-C`         | string  | Set the directory for this command               | Current working directory         |
 | `--schema`   | string  | Set the JSON Schema file                         | The config file's `$schema` value |
 | `--check`    | boolean | Check key order without changing the config file | `false`                           |
 | `-h, --help` | boolean | Print help                                       | `false`                           |
@@ -59,7 +59,7 @@ The configuration file must have a string `$schema` value unless you use `--sche
 
 The tool resolves a relative schema path from the configuration file's directory. This rule also applies to a path that you set with `--schema`.
 
-The tool resolves a relative `--cwd` path from the directory where you start the command. The tool then resolves `<CONFIG>` from the new directory.
+The tool resolves a relative `-C` path from the directory where you start the command. The tool then resolves `<CONFIG>` from the new directory.
 
 ## Check key order
 

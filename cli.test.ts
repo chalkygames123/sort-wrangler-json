@@ -386,6 +386,53 @@ describe('sort-wrangler-json', () => {
 			}
 		});
 
+		test('should run from the directory specified with -C', async () => {
+			const temporaryDirectory = await mkdtemp(path.join(tmpdir(), 'sort-wrangler-json-'));
+
+			const configFilePath = path.join(temporaryDirectory, 'wrangler.jsonc');
+
+			const schemaFilePath = path.join(temporaryDirectory, 'schema.json');
+
+			const originalConfig = `{
+	"main": "index.js",
+	"name": "test"
+}`;
+
+			const expectedConfig = `{
+	"name": "test",
+	"main": "index.js"
+}`;
+
+			await writeFile(configFilePath, originalConfig, 'utf-8');
+
+			await writeFile(
+				schemaFilePath,
+				JSON.stringify({
+					properties: {
+						name: { type: 'string' },
+						main: { type: 'string' },
+					},
+				}),
+				'utf-8',
+			);
+
+			try {
+				const result = spawnSync(
+					process.execPath,
+					[path.join(import.meta.dirname, 'cli.ts'), '-C', temporaryDirectory, '--schema', './schema.json'],
+					{ encoding: 'utf8' },
+				);
+
+				expect(result.status).toBe(0);
+
+				expect(result.stderr).toBe('');
+
+				expect(await readFile(configFilePath, 'utf-8')).toBe(expectedConfig);
+			} finally {
+				await rm(temporaryDirectory, { recursive: true, force: true });
+			}
+		});
+
 		test('should write sorted output to the configuration file by default', async () => {
 			const temporaryDirectory = await mkdtemp(path.join(tmpdir(), 'sort-wrangler-json-'));
 
