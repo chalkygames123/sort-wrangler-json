@@ -456,11 +456,9 @@ const main = async (): Promise<void> => {
 		options: {
 			cwd: {
 				type: 'string',
-				short: 'c',
 			},
 			schema: {
 				type: 'string',
-				short: 's',
 			},
 			check: {
 				type: 'boolean',
@@ -484,18 +482,18 @@ Arguments:
   config               Path to the configuration file to sort
 
 Options:
-  -c, --cwd <path>     Directory to run the command from (relative to the current working directory)
-  -s, --schema <path>  Path to the schema file to override (relative to the configuration file)
+      --cwd <path>     Directory to run the command from (relative to the current working directory)
+      --schema <path>  Path to the schema file to override (relative to the configuration file)
       --check          Check whether the configuration is sorted without writing changes
   -h, --help           Whether to print the help message
 
 Examples:
   sort-wrangler-json                      # Sort and write to default file
   sort-wrangler-json --check               # Check whether the default file is sorted
-  sort-wrangler-json -s schema.jsonc      # Use a custom schema file
+  sort-wrangler-json --schema schema.jsonc # Use a custom schema file
   sort-wrangler-json config.jsonc         # Sort and write to specified file
   sort-wrangler-json config.json          # Sort a JSON configuration file
-  sort-wrangler-json -c ./my-project      # Run from a different directory
+  sort-wrangler-json --cwd ./my-project   # Run from a different directory
 `);
 
 		return;

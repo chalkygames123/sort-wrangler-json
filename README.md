@@ -31,12 +31,12 @@ Both `.json` and `.jsonc` files are supported. If `<CONFIG>` is omitted, the too
 
 ### Options
 
-| Option         | Type    | Description                                                                   | Default     |
-| -------------- | ------- | ----------------------------------------------------------------------------- | ----------- |
-| `-c, --cwd`    | string  | Directory to run the command from (relative to the current working directory) | `undefined` |
-| `-s, --schema` | string  | Path to the schema file to override (relative to the configuration file)      | `undefined` |
-| `--check`      | boolean | Check whether the configuration is sorted without writing changes             | `false`     |
-| `-h, --help`   | boolean | Whether to print the help message                                             | `false`     |
+| Option       | Type    | Description                                                                   | Default     |
+| ------------ | ------- | ----------------------------------------------------------------------------- | ----------- |
+| `--cwd`      | string  | Directory to run the command from (relative to the current working directory) | `undefined` |
+| `--schema`   | string  | Path to the schema file to override (relative to the configuration file)      | `undefined` |
+| `--check`    | boolean | Check whether the configuration is sorted without writing changes             | `false`     |
+| `-h, --help` | boolean | Whether to print the help message                                             | `false`     |
 
 ## How It Works
 
