@@ -450,7 +450,7 @@ export const sortJsoncContent = async (
  */
 const main = async (): Promise<void> => {
 	const {
-		values: { cwd: cwdPath, schema: schemaFilePathOverride, write: shouldWrite, help: showHelp },
+		values: { cwd: cwdPath, schema: schemaFilePathOverride, help: showHelp },
 		positionals,
 	} = parseArgs({
 		options: {
@@ -461,11 +461,6 @@ const main = async (): Promise<void> => {
 			schema: {
 				type: 'string',
 				short: 's',
-			},
-			write: {
-				type: 'boolean',
-				short: 'w',
-				default: false,
 			},
 			help: {
 				type: 'boolean',
@@ -487,15 +482,13 @@ Arguments:
 Options:
   -c, --cwd <path>     Directory to run the command from (relative to the current working directory)
   -s, --schema <path>  Path to the schema file to override (relative to the configuration file)
-  -w, --write          Whether to write the sorted output back to the file instead of stdout
   -h, --help           Whether to print the help message
 
 Examples:
-  sort-wrangler-json                      # Display sorted output
+  sort-wrangler-json                      # Sort and write to default file
   sort-wrangler-json -s schema.jsonc      # Use a custom schema file
-  sort-wrangler-json -w                   # Sort and write to default file
-  sort-wrangler-json config.jsonc -w      # Sort and write to specified file
-  sort-wrangler-json config.json -w       # Sort a JSON configuration file
+  sort-wrangler-json config.jsonc         # Sort and write to specified file
+  sort-wrangler-json config.json          # Sort a JSON configuration file
   sort-wrangler-json -c ./my-project      # Run from a different directory
 `);
 
@@ -539,11 +532,7 @@ Examples:
 	const sortKeysConfigs = createSortKeysConfigs(rootSchema, schema);
 	const { output } = await sortJsoncContent(configContent, configFilePath, sortKeysConfigs);
 
-	if (shouldWrite) {
-		await writeFile(configFilePath, output, 'utf-8');
-	} else {
-		process.stdout.write(output);
-	}
+	await writeFile(configFilePath, output, 'utf-8');
 };
 
 // Invokes the entry point only when Node marks this module as the main entry, which remains correct through symlinks.
