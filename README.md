@@ -19,7 +19,7 @@ pnpm add --global .
 - Sorts keys in environment-specific configurations.
 - Places `env` last when the schema defines that key.
 - Preserves comments in JSONC files.
-- Writes sorted output to the configuration file by default.
+- Writes sorted output to the configuration file by default, only when the file needs sorting.
 - Checks key order without changing the file when you use `--check`.
 
 ## Use
@@ -75,7 +75,7 @@ The command exits with status `0` if the key order matches the schema. It prints
 
 ## Change behavior
 
-Without `--check`, the tool writes the sorted output to the configuration file. It does not print the output to standard output. The tool overwrites the file.
+Without `--check`, the tool writes the sorted output to the configuration file only when sorting changes its contents. It does not print the output to standard output.
 
 Keep the file in version control or make a backup before you run the command. This lets you review or restore the original content.
 

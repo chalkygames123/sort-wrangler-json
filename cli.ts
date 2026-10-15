@@ -566,7 +566,9 @@ Examples:
 		return;
 	}
 
-	await writeFile(configFilePath, output, 'utf-8');
+	if (output !== configContent) {
+		await writeFile(configFilePath, output, 'utf-8');
+	}
 };
 
 // Invokes the entry point only when Node marks this module as the main entry, which remains correct through symlinks.

@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, stat, symlink, utimes, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -477,6 +477,58 @@ describe('sort-wrangler-json', () => {
 				expect(result.stdout).toBe('');
 
 				expect(await readFile(configFilePath, 'utf-8')).toBe(expectedConfig);
+			} finally {
+				await rm(temporaryDirectory, { recursive: true, force: true });
+			}
+		});
+
+		test('should not write to the configuration file when it is already sorted', async () => {
+			const temporaryDirectory = await mkdtemp(path.join(tmpdir(), 'sort-wrangler-json-'));
+
+			const configFilePath = path.join(temporaryDirectory, 'wrangler.jsonc');
+
+			const schemaFilePath = path.join(temporaryDirectory, 'schema.json');
+
+			const sortedConfig = `{
+	"name": "test",
+	"main": "index.js"
+}`;
+
+			await writeFile(configFilePath, sortedConfig, 'utf-8');
+
+			await writeFile(
+				schemaFilePath,
+				JSON.stringify({
+					properties: {
+						name: { type: 'string' },
+						main: { type: 'string' },
+					},
+				}),
+				'utf-8',
+			);
+
+			try {
+				const previousModifiedAt = new Date('2000-01-01T00:00:00.000Z');
+
+				await utimes(configFilePath, previousModifiedAt, previousModifiedAt);
+
+				const modifiedAtBefore = (await stat(configFilePath, { bigint: true })).mtimeNs;
+
+				const result = spawnSync(
+					process.execPath,
+					[path.join(import.meta.dirname, 'cli.ts'), 'wrangler.jsonc', '--schema', './schema.json'],
+					{ cwd: temporaryDirectory, encoding: 'utf8' },
+				);
+
+				expect(result.status).toBe(0);
+
+				expect(result.stderr).toBe('');
+
+				expect(result.stdout).toBe('');
+
+				expect(await readFile(configFilePath, 'utf-8')).toBe(sortedConfig);
+
+				expect((await stat(configFilePath, { bigint: true })).mtimeNs).toBe(modifiedAtBefore);
 			} finally {
 				await rm(temporaryDirectory, { recursive: true, force: true });
 			}
