@@ -9,15 +9,14 @@
 		"./cli.ts"
 	],
 	"scripts": {
-		"check": "biome check",
-		"check:write": "biome check --write --unsafe",
-		"format": "biome format",
-		"format:write": "biome format --write",
-		"lint": "biome lint",
-		"lint:write": "biome lint --write --unsafe",
+		"check": "pnpm run fmt:check && pnpm run lint",
+		"check:fix": "pnpm run fmt && pnpm run lint:fix",
+		"fmt": "oxfmt",
+		"fmt:check": "oxfmt --check",
+		"lint": "oxlint",
+		"lint:fix": "oxlint --fix --fix-suggestions --fix-dangerously",
 		"test": "vitest run",
-		"test:watch": "vitest",
-		"types:check": "tsc"
+		"test:watch": "vitest"
 	},
 	"dependencies": {
 		"eslint": "catalog:",
@@ -25,13 +24,17 @@
 		"jsonc-eslint-parser": "catalog:"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "catalog:",
 		"@commitlint/cli": "catalog:",
 		"@commitlint/config-conventional": "catalog:",
 		"@commitlint/types": "catalog:",
+		"@stylistic/eslint-plugin": "catalog:",
 		"@types/json-schema": "catalog:",
 		"@types/node": "catalog:",
+		"globals": "catalog:",
 		"lefthook": "catalog:",
+		"oxfmt": "catalog:",
+		"oxlint": "catalog:",
+		"oxlint-tsgolint": "catalog:",
 		"typescript": "catalog:",
 		"vitest": "catalog:",
 		"wrangler": "catalog:",

@@ -1,10 +1,11 @@
 pre-commit:
   jobs:
-    - run: pnpm exec biome check --staged --no-errors-on-unmatched
+    - run: pnpm exec oxfmt --check --no-error-on-unmatched-pattern {staged_files}
+    - run: pnpm exec oxlint --no-error-on-unmatched-pattern {staged_files}
 
 prepare-commit-msg:
   scripts:
-    "prepare-commit-msg.sh":
+    'prepare-commit-msg.sh':
       runner: bash
 
 commit-msg:
