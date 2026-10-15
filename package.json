@@ -22,25 +22,25 @@
 		"reinstall": "pnpm clean && pnpm install"
 	},
 	"dependencies": {
-		"eslint": "9.38.0",
-		"eslint-plugin-jsonc": "2.21.0",
-		"jsonc-eslint-parser": "2.4.1"
+		"eslint": "catalog:",
+		"eslint-plugin-jsonc": "catalog:",
+		"jsonc-eslint-parser": "catalog:"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.2.6",
-		"@commitlint/cli": "20.1.0",
-		"@commitlint/config-conventional": "20.0.0",
-		"@commitlint/types": "20.0.0",
-		"@types/json-schema": "7.0.15",
-		"@types/node": "24.8.1",
-		"husky": "9.1.7",
-		"typescript": "5.9.3",
-		"vitest": "3.2.4",
-		"wrangler": "4.43.0",
-		"zod": "4.1.12"
+		"@biomejs/biome": "catalog:",
+		"@commitlint/cli": "catalog:",
+		"@commitlint/config-conventional": "catalog:",
+		"@commitlint/types": "catalog:",
+		"@types/json-schema": "catalog:",
+		"@types/node": "catalog:",
+		"husky": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:",
+		"wrangler": "catalog:",
+		"zod": "catalog:"
 	},
 	"peerDependencies": {
-		"eslint": "^9.0.0"
+		"eslint": "catalog:"
 	},
 	"devEngines": {
 		"packageManager": {
