@@ -1,47 +1,89 @@
 # `sort-wrangler-json`
 
-A CLI tool to sort Wrangler configuration files written in JSON (`wrangler.json`) or JSONC (`wrangler.jsonc`) based on their schema definition. Comments in JSONC files are preserved.
+`sort-wrangler-json` sorts Wrangler configuration files. It supports JSON and JSONC files. It orders keys by the property order in a JSON Schema. It preserves comments in JSONC files.
 
-> [!IMPORTANT]
-> This package is not yet published to any registry. You can use it by cloning the repository and installing it by running `pnpm install && pnpm add --global .` in the project root.
+## Install
+
+The project does not publish this package to a package registry yet. Clone the repository. Run these commands in the project directory:
+
+```shell
+pnpm install
+pnpm add --global .
+```
 
 ## Features
 
-- Sorts keys within the configuration based on the schema
-- Sorts keys within the environment-specific configurations as well as the top-level one
-- Places the `env` key at the end of the configuration for a clear inheritance hierarchy
-- Preserves all comments
-- Writes sorted output directly to the configuration file
+- Sorts keys in the top-level configuration and nested objects.
+- Sorts keys in environment-specific configurations.
+- Places `env` last when the schema defines that key.
+- Preserves comments in JSONC files.
+- Writes sorted output to the configuration file by default.
+- Checks key order without changing the file when you use `--check`.
 
-## Usage
-
-Sort the configuration file in place:
+## Use
 
 ```shell
 sort-wrangler-json [<CONFIG>] [OPTIONS]
 ```
 
-### Parameters
+Sort the default file:
 
-| Parameter  | Type   | Description                            | Default            |
-| ---------- | ------ | -------------------------------------- | ------------------ |
-| `<CONFIG>` | string | Path to the configuration file to sort | `./wrangler.jsonc` |
+```shell
+sort-wrangler-json
+```
 
-Both `.json` and `.jsonc` files are supported. If `<CONFIG>` is omitted, the tool uses `./wrangler.jsonc`.
+Sort a file that you specify:
 
-### Options
+```shell
+sort-wrangler-json ./path/to/wrangler.jsonc
+```
 
-| Option       | Type    | Description                                                                   | Default     |
-| ------------ | ------- | ----------------------------------------------------------------------------- | ----------- |
-| `--cwd`      | string  | Directory to run the command from (relative to the current working directory) | `undefined` |
-| `--schema`   | string  | Path to the schema file to override (relative to the configuration file)      | `undefined` |
-| `--check`    | boolean | Check whether the configuration is sorted without writing changes             | `false`     |
-| `-h, --help` | boolean | Whether to print the help message                                             | `false`     |
+The tool supports `.json` and `.jsonc` files. If you omit `<CONFIG>`, the tool uses `./wrangler.jsonc`.
 
-## How It Works
+## Arguments
 
-1. Reads the Wrangler configuration file from the current directory (or specified path)
-2. Extracts the `$schema` key to locate the schema file
-3. Dynamically builds an ESLint configuration with the [`jsonc/sort-keys`](https://ota-meshi.github.io/eslint-plugin-jsonc/rules/sort-keys.html) rule based on the schema
-4. Applies ESLint's autofixes
-5. Checks for sorting issues with `--check`, or writes the sorted output back to the original file by default
+| Argument   | Type   | Description                      | Default            |
+| ---------- | ------ | -------------------------------- | ------------------ |
+| `<CONFIG>` | string | Path to the Wrangler config file | `./wrangler.jsonc` |
+
+## Options
+
+| Option       | Type    | Description                                      | Default                           |
+| ------------ | ------- | ------------------------------------------------ | --------------------------------- |
+| `--cwd`      | string  | Set the directory for this command               | Current working directory         |
+| `--schema`   | string  | Set the JSON Schema file                         | The config file's `$schema` value |
+| `--check`    | boolean | Check key order without changing the config file | `false`                           |
+| `-h, --help` | boolean | Print help                                       | `false`                           |
+
+The configuration file must have a string `$schema` value unless you use `--schema`. The tool uses that value to find the JSON Schema file.
+
+The tool resolves a relative schema path from the configuration file's directory. This rule also applies to a path that you set with `--schema`.
+
+The tool resolves a relative `--cwd` path from the directory where you start the command. The tool then resolves `<CONFIG>` from the new directory.
+
+## Check key order
+
+Use `--check` in a script or a continuous integration job:
+
+```shell
+sort-wrangler-json --check
+```
+
+The command exits with status `0` if the key order matches the schema. It prints a message to standard error and exits with status `1` if the key order does not match the schema. It does not change the file.
+
+## Change behavior
+
+Without `--check`, the tool writes the sorted output to the configuration file. It does not print the output to standard output. The tool overwrites the file.
+
+Keep the file in version control or make a backup before you run the command. This lets you review or restore the original content.
+
+The tool prints errors to standard error. It exits with a non-zero status if it cannot read or process the configuration or schema file.
+
+## How the tool works
+
+1. The tool reads the Wrangler configuration file.
+2. The tool reads the schema path from `$schema`, or from `--schema`.
+3. The tool reads the JSON Schema.
+4. The tool uses the schema's property order to configure the [`jsonc/sort-keys` rule](https://ota-meshi.github.io/eslint-plugin-jsonc/rules/sort-keys.html).
+5. The tool runs ESLint to sort the keys.
+6. The tool checks the result when you use `--check`. Otherwise, it writes the result to the configuration file.
