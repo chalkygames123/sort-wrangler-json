@@ -289,13 +289,13 @@ describe('sort-wrangler-json', () => {
 	});
 
 	describe('sortJsoncContent', () => {
-		test('should sort JSONC content correctly', async () => {
+		test.each(['jsonc', 'json'])('should sort %s content correctly', async (extension) => {
 			const content = `{
 	"name": "test",
 	"main": "index.js",
 	"compatibility_date": "2025-01-01"
 }`;
-			const filePath = 'test.jsonc';
+			const filePath = `test.${extension}`;
 			const sortKeysConfigs = [
 				{
 					pathPattern: '^$',

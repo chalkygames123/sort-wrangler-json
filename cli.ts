@@ -214,9 +214,9 @@ export const extractRootSchema = (schema: JSONSchema7): JSONSchema7 => {
 };
 
 /**
- * Extracts the $schema property value from a JSONC configuration file.
+ * Extracts the $schema property value from a JSON or JSONC configuration file.
  *
- * @param ast - The parsed AST of the JSONC file.
+ * @param ast - The parsed AST of the configuration file.
  * @returns The value of the $schema property.
  */
 const extractSchemaPath = (ast: ReturnType<typeof jsoncEslintParser.parseForESLint>): string => {
@@ -385,7 +385,7 @@ export const createSortKeysConfigs = (rootSchema: JSONSchema7, fullSchema: JSONS
 };
 
 /**
- * Creates an ESLint instance configured for sorting JSONC files.
+ * Creates an ESLint instance configured for sorting JSON and JSONC files.
  *
  * @param sortKeysConfigs - The sort keys configuration.
  * @returns A configured ESLint instance.
@@ -393,7 +393,7 @@ export const createSortKeysConfigs = (rootSchema: JSONSchema7, fullSchema: JSONS
 const createSortingESLint = (sortKeysConfigs: SortKeysConfig[]): ESLint => {
 	const eslintConfig = [
 		{
-			files: ['**/*.jsonc'],
+			files: ['**/*.json', '**/*.jsonc'],
 			languageOptions: {
 				parser: jsoncEslintParser,
 			},
@@ -414,9 +414,9 @@ const createSortingESLint = (sortKeysConfigs: SortKeysConfig[]): ESLint => {
 };
 
 /**
- * Sorts JSONC content using ESLint.
+ * Sorts JSON or JSONC content using ESLint.
  *
- * @param content - The JSONC content to sort.
+ * @param content - The JSON or JSONC content to sort.
  * @param filePath - The file path for error reporting.
  * @param sortKeysConfigs - The sort keys configuration.
  * @returns The sorted content and lint result.
@@ -495,6 +495,7 @@ Examples:
   sort-wrangler-json -s schema.jsonc      # Use a custom schema file
   sort-wrangler-json -w                   # Sort and write to default file
   sort-wrangler-json config.jsonc -w      # Sort and write to specified file
+  sort-wrangler-json config.json -w       # Sort a JSON configuration file
   sort-wrangler-json -c ./my-project      # Run from a different directory
 `);
 

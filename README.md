@@ -1,6 +1,6 @@
 # `sort-wrangler-json`
 
-A CLI tool to sort Wrangler configuration files written in JSON format (`wrangler.json` or `wrangler.jsonc`) based on their schema definition while preserving all original comments.
+A CLI tool to sort Wrangler configuration files written in JSON (`wrangler.json`) or JSONC (`wrangler.jsonc`) based on their schema definition. Comments in JSONC files are preserved.
 
 > [!IMPORTANT]
 > This package is not yet published to any registry. You can use it by cloning the repository and installing it by running `pnpm install && pnpm add --global .` in the project root.
@@ -26,6 +26,8 @@ npx sort-wrangler-json [<CONFIG>] [OPTIONS]
 | Parameter  | Type   | Description                            | Default            |
 | ---------- | ------ | -------------------------------------- | ------------------ |
 | `<CONFIG>` | string | Path to the configuration file to sort | `./wrangler.jsonc` |
+
+Both `.json` and `.jsonc` files are supported. If `<CONFIG>` is omitted, the tool uses `./wrangler.jsonc`.
 
 ### Options
 
