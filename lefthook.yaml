@@ -1,0 +1,12 @@
+pre-commit:
+  jobs:
+    - run: pnpm exec biome check --staged --no-errors-on-unmatched
+
+prepare-commit-msg:
+  scripts:
+    "prepare-commit-msg.sh":
+      runner: bash
+
+commit-msg:
+  jobs:
+    - run: pnpm exec commitlint --edit {1}

@@ -17,8 +17,7 @@
 		"lint:write": "biome lint --write --unsafe",
 		"test": "vitest run",
 		"test:watch": "vitest",
-		"types:check": "tsc",
-		"prepare": "husky"
+		"types:check": "tsc"
 	},
 	"dependencies": {
 		"eslint": "catalog:",
@@ -32,7 +31,7 @@
 		"@commitlint/types": "catalog:",
 		"@types/json-schema": "catalog:",
 		"@types/node": "catalog:",
-		"husky": "catalog:",
+		"lefthook": "catalog:",
 		"typescript": "catalog:",
 		"vitest": "catalog:",
 		"wrangler": "catalog:",
