@@ -4,6 +4,8 @@
 
 ## Install
 
+Requires Node.js 24 or later.
+
 The project does not publish this package to a package registry yet. Clone the repository. Run these commands in the project directory:
 
 ```shell
