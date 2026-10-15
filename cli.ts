@@ -450,7 +450,7 @@ export const sortJsoncContent = async (
  */
 const main = async (): Promise<void> => {
 	const {
-		values: { cwd: cwdPath, schema: schemaFilePathOverride, help: showHelp },
+		values: { cwd: cwdPath, schema: schemaFilePathOverride, check: shouldCheck, help: showHelp },
 		positionals,
 	} = parseArgs({
 		options: {
@@ -461,6 +461,10 @@ const main = async (): Promise<void> => {
 			schema: {
 				type: 'string',
 				short: 's',
+			},
+			check: {
+				type: 'boolean',
+				default: false,
 			},
 			help: {
 				type: 'boolean',
@@ -482,10 +486,12 @@ Arguments:
 Options:
   -c, --cwd <path>     Directory to run the command from (relative to the current working directory)
   -s, --schema <path>  Path to the schema file to override (relative to the configuration file)
+      --check          Check whether the configuration is sorted without writing changes
   -h, --help           Whether to print the help message
 
 Examples:
   sort-wrangler-json                      # Sort and write to default file
+  sort-wrangler-json --check               # Check whether the default file is sorted
   sort-wrangler-json -s schema.jsonc      # Use a custom schema file
   sort-wrangler-json config.jsonc         # Sort and write to specified file
   sort-wrangler-json config.json          # Sort a JSON configuration file
@@ -531,6 +537,15 @@ Examples:
 	const rootSchema = extractRootSchema(schema);
 	const sortKeysConfigs = createSortKeysConfigs(rootSchema, schema);
 	const { output } = await sortJsoncContent(configContent, configFilePath, sortKeysConfigs);
+
+	if (shouldCheck) {
+		if (output !== configContent) {
+			console.error(`Configuration is not sorted: ${configFilePath}`);
+			process.exitCode = 1;
+		}
+
+		return;
+	}
 
 	await writeFile(configFilePath, output, 'utf-8');
 };

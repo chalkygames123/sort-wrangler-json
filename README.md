@@ -35,6 +35,7 @@ Both `.json` and `.jsonc` files are supported. If `<CONFIG>` is omitted, the too
 | -------------- | ------- | ----------------------------------------------------------------------------- | ----------- |
 | `-c, --cwd`    | string  | Directory to run the command from (relative to the current working directory) | `undefined` |
 | `-s, --schema` | string  | Path to the schema file to override (relative to the configuration file)      | `undefined` |
+| `--check`      | boolean | Check whether the configuration is sorted without writing changes             | `false`     |
 | `-h, --help`   | boolean | Whether to print the help message                                             | `false`     |
 
 ## How It Works
@@ -43,4 +44,4 @@ Both `.json` and `.jsonc` files are supported. If `<CONFIG>` is omitted, the too
 2. Extracts the `$schema` key to locate the schema file
 3. Dynamically builds an ESLint configuration with the [`jsonc/sort-keys`](https://ota-meshi.github.io/eslint-plugin-jsonc/rules/sort-keys.html) rule based on the schema
 4. Applies ESLint's autofixes
-5. Writes the sorted output back to the original file
+5. Checks for sorting issues with `--check`, or writes the sorted output back to the original file by default

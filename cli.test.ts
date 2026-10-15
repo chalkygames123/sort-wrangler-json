@@ -391,5 +391,56 @@ describe('sort-wrangler-json', () => {
 				await rm(temporaryDirectory, { recursive: true, force: true });
 			}
 		});
+
+		test('should check sorted output without writing to the configuration file', async () => {
+			const temporaryDirectory = await mkdtemp(path.join(tmpdir(), 'sort-wrangler-json-'));
+			const configFilePath = path.join(temporaryDirectory, 'wrangler.jsonc');
+			const schemaFilePath = path.join(temporaryDirectory, 'schema.json');
+			const originalConfig = `{
+	"main": "index.js",
+	"name": "test"
+}`;
+			const sortedConfig = `{
+	"name": "test",
+	"main": "index.js"
+}`;
+
+			await writeFile(configFilePath, originalConfig, 'utf-8');
+			await writeFile(
+				schemaFilePath,
+				JSON.stringify({
+					properties: {
+						name: { type: 'string' },
+						main: { type: 'string' },
+					},
+				}),
+				'utf-8',
+			);
+
+			try {
+				const cliPath = path.join(import.meta.dirname, 'cli.ts');
+				const runCheck = () =>
+					spawnSync(process.execPath, [cliPath, 'wrangler.jsonc', '--schema', './schema.json', '--check'], {
+						cwd: temporaryDirectory,
+						encoding: 'utf8',
+					});
+
+				const unsortedResult = runCheck();
+				expect(unsortedResult.status).toBe(1);
+				expect(unsortedResult.stdout).toBe('');
+				expect(unsortedResult.stderr).toContain('Configuration is not sorted');
+				expect(await readFile(configFilePath, 'utf-8')).toBe(originalConfig);
+
+				await writeFile(configFilePath, sortedConfig, 'utf-8');
+
+				const sortedResult = runCheck();
+				expect(sortedResult.status).toBe(0);
+				expect(sortedResult.stdout).toBe('');
+				expect(sortedResult.stderr).toBe('');
+				expect(await readFile(configFilePath, 'utf-8')).toBe(sortedConfig);
+			} finally {
+				await rm(temporaryDirectory, { recursive: true, force: true });
+			}
+		});
 	});
 });
