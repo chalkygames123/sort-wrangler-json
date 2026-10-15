@@ -5,24 +5,24 @@ allowBuilds:
   workerd: false
 
 catalog:
-  '@commitlint/cli': 20.1.0
-  '@commitlint/config-conventional': 20.0.0
-  '@commitlint/types': 20.0.0
+  '@commitlint/cli': 21.2.3
+  '@commitlint/config-conventional': 21.2.3
+  '@commitlint/types': 21.2.3
   '@stylistic/eslint-plugin': 5.10.0
   '@types/json-schema': 7.0.15
-  '@types/node': 24.8.1
+  '@types/node': 26.6.5
   eslint: 10.12.0
   eslint-plugin-jsonc: 3.4.2
   globals: 17.13.0
   jsonc-eslint-parser: 3.3.0
-  lefthook: 2.2.1
+  lefthook: 2.2.2
   oxfmt: 0.73.0
   oxlint: 1.88.0
   oxlint-tsgolint: 7.0.2004
-  typescript: 5.9.3
-  vitest: 3.2.4
-  wrangler: 4.43.0
-  zod: 4.1.12
+  typescript: 7.0.2
+  vitest: 5.0.4
+  wrangler: 4.151.0
+  zod: 4.6.7
 
 catalogMode: strict
 
