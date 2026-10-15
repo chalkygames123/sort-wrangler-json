@@ -11,9 +11,9 @@
 		"noUncheckedIndexedAccess": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"strict": true,
 
 		// Modules
+		"allowImportingTsExtensions": true,
 		"module": "preserve",
 		"resolveJsonModule": true,
 		"types": ["node"],
@@ -21,16 +21,16 @@
 		// Emit
 		"noEmit": true,
 
+		// JavaScript Support
+		"allowJs": true,
+
 		// Interop Constraints
 		"erasableSyntaxOnly": true,
 		"verbatimModuleSyntax": true,
 
 		// Language and Environment
-		"jsx": "react-jsx",
 		"lib": ["ESNext"],
-		"libReplacement": true,
 		"moduleDetection": "force",
-		"target": "esnext",
 
 		// Completeness
 		"skipLibCheck": true
