@@ -7,7 +7,7 @@ import { parseArgs } from 'node:util';
 import { ESLint, type Linter } from 'eslint';
 import eslintPluginJsonc from 'eslint-plugin-jsonc';
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
-import jsoncEslintParser from 'jsonc-eslint-parser';
+import { parseForESLint, type AST } from 'jsonc-eslint-parser';
 
 const isNativeError = (error: unknown): error is NodeJS.ErrnoException =>
 	Error.isError(error) && 'code' in error && typeof error.code === 'string';
@@ -224,7 +224,7 @@ export const extractRootSchema = (schema: JSONSchema7): JSONSchema7 => {
  * @param ast - The parsed AST of the configuration file.
  * @returns The value of the $schema property.
  */
-const extractSchemaPath = (ast: ReturnType<typeof jsoncEslintParser.parseForESLint>): string => {
+const extractSchemaPath = (ast: ReturnType<typeof parseForESLint>): string => {
 	const expressionStatement = ast.ast.body[0];
 
 	if (
@@ -236,7 +236,7 @@ const extractSchemaPath = (ast: ReturnType<typeof jsoncEslintParser.parseForESLi
 	}
 
 	const schemaProperty = expressionStatement.expression.properties.find(
-		(prop): prop is jsoncEslintParser.AST.JSONProperty =>
+		(prop): prop is AST.JSONProperty =>
 			prop.type === 'JSONProperty' && prop.key.type === 'JSONLiteral' && prop.key.value === '$schema',
 	);
 
@@ -532,9 +532,7 @@ Examples:
 
 	const configContent = await readFile(configFilePath, 'utf-8');
 
-	const ast = jsoncEslintParser.parseForESLint(configContent, {
-		filePath: configFilePath,
-	});
+	const ast = parseForESLint(configContent);
 
 	const configDirectory = path.dirname(configFilePath);
 
