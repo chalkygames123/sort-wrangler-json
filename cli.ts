@@ -189,6 +189,27 @@ export const extractRootSchema = (schema: JSONSchema7): JSONSchema7 => {
 		return schema;
 	}
 
+	if (schema.allOf) {
+		const allOfSchemas = schema.allOf.flatMap((definition) => {
+			const resolvedDefinition = resolveDefinition(definition);
+
+			if (!resolvedDefinition) {
+				return [];
+			}
+
+			const resolvedSchema = resolveRefLoop(schema, resolvedDefinition);
+
+			return hasProperties(resolvedSchema) ? [resolvedSchema] : [];
+		});
+
+		if (allOfSchemas.length > 0) {
+			return {
+				...schema,
+				properties: Object.assign({}, ...allOfSchemas.map(({ properties }) => properties)),
+			};
+		}
+	}
+
 	throw new Error('Unable to extract properties from the schema.');
 };
 

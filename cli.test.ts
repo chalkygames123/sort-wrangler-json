@@ -79,6 +79,25 @@ describe('sort-wrangler-json', () => {
 			});
 		});
 
+		test('should resolve allOf references and extract root schema properties', () => {
+			const schema: JSONSchema7 = {
+				definitions: {
+					RawConfig: {
+						properties: {
+							name: { type: 'string' },
+						},
+					},
+				},
+				allOf: [{ $ref: '#/definitions/RawConfig' }],
+			};
+
+			const result = extractRootSchema(schema);
+
+			expect(result.properties).toEqual({
+				name: { type: 'string' },
+			});
+		});
+
 		test('should throw an error when properties cannot be extracted', () => {
 			const schema: JSONSchema7 = {};
 
