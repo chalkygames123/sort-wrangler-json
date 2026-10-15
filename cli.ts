@@ -402,12 +402,10 @@ const createSortingESLint = (sortKeysConfigs: SortKeysConfig[]): ESLint => {
 	const eslintConfig = [
 		{
 			files: ['**/*.json', '**/*.jsonc'],
-			languageOptions: {
-				parser: jsoncEslintParser,
-			},
 			plugins: {
-				jsonc: eslintPluginJsonc as ESLint.Plugin,
+				jsonc: eslintPluginJsonc,
 			},
+			language: 'jsonc/x',
 			rules: {
 				'jsonc/sort-keys': ['error', ...sortKeysConfigs],
 			},
