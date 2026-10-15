@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+
 import { RuleConfigSeverity, type SyncRule, type UserConfig } from '@commitlint/types';
 import { z } from 'zod';
 
@@ -10,7 +11,9 @@ const getWorkspacePackages = (): string[] => {
 	}
 
 	const schema = z.object({ name: z.string() }).array();
+
 	const parsed: Array<{ name: string }> = schema.parse(JSON.parse(raw));
+
 	const names = parsed.map((p) => p.name);
 
 	return names;
@@ -32,6 +35,7 @@ export default {
 					}
 
 					const pattern = new RegExp(`^${type}\\(\\):`);
+
 					const hasHeaderParentheses = pattern.test(header);
 
 					return [
@@ -50,7 +54,9 @@ export default {
 					}
 
 					const scopesPattern = `(${value.join('|')})`;
+
 					const validationPattern = new RegExp(`^${scopesPattern}(, ${scopesPattern})*$`);
+
 					const isFormatValid = validationPattern.test(scope);
 
 					return [

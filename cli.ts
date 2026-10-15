@@ -3,6 +3,7 @@
 import { readFile, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
+
 import { ESLint, type Linter } from 'eslint';
 import eslintPluginJsonc from 'eslint-plugin-jsonc';
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
@@ -43,10 +44,13 @@ const formatPathSegment = (segment: PathSegment): string => {
 	switch (segment.kind) {
 		case 'literal':
 			return escapeRegex(segment.value);
+
 		case 'wildcard':
 			return '[^.]+';
+
 		case 'array':
 			return '\\[[0-9]+\\]';
+
 		default: {
 			throw new Error('Unexpected path segment kind.');
 		}
@@ -157,6 +161,7 @@ const isJSONSchema7 = (value: unknown): value is JSONSchema7 => isRecord(value);
  */
 export const resolveSchemaRef = (schema: JSONSchema7, ref: string): JSONSchema7 => {
 	const refPath = ref.split('/').slice(1);
+
 	let current: unknown = schema;
 
 	for (const segment of refPath) {
@@ -272,8 +277,10 @@ export const generatePropertyOrder = (schema: JSONSchema7): string[] => {
  */
 export const createSortKeysConfigs = (rootSchema: JSONSchema7, fullSchema: JSONSchema7): SortKeysConfig[] => {
 	const configs: SortKeysConfig[] = [];
+
 	// Prevents duplicate ESLint rules when multiple schema paths resolve to the same pattern.
 	const seenPatterns = new Set<string>();
+
 	// Prevents infinite recursion when the schema graph contains cycles.
 	const activeSchemas = new Set<JSONSchema7>();
 
@@ -352,6 +359,7 @@ export const createSortKeysConfigs = (rootSchema: JSONSchema7, fullSchema: JSONS
 
 	const traverseSchema = (schema: JSONSchema7, path: PathSegment[]): void => {
 		const resolvedSchema = resolveRefLoop(fullSchema, schema);
+
 		const isRecursivePath = activeSchemas.has(resolvedSchema);
 
 		if (hasProperties(resolvedSchema)) {
@@ -427,7 +435,9 @@ export const sortJsoncContent = async (
 	sortKeysConfigs: SortKeysConfig[],
 ): Promise<{ output: string; result: ESLint.LintResult }> => {
 	const eslint = createSortingESLint(sortKeysConfigs);
+
 	const results = await eslint.lintText(content, { filePath });
+
 	const [result] = results;
 
 	if (!result) {
@@ -522,23 +532,33 @@ Examples:
 	const configFilePath = positionals[0] ?? './wrangler.jsonc';
 
 	const configContent = await readFile(configFilePath, 'utf-8');
+
 	const ast = jsoncEslintParser.parseForESLint(configContent, {
 		filePath: configFilePath,
 	});
+
 	const configDirectory = path.dirname(configFilePath);
+
 	const schemaFilePath = schemaFilePathOverride ?? extractSchemaPath(ast);
+
 	const schemaFilePathAbsolute = path.isAbsolute(schemaFilePath)
 		? schemaFilePath
 		: path.resolve(configDirectory, schemaFilePath);
+
 	const schemaContent = await readFile(schemaFilePathAbsolute, 'utf-8');
+
 	const schema: JSONSchema7 = JSON.parse(schemaContent);
+
 	const rootSchema = extractRootSchema(schema);
+
 	const sortKeysConfigs = createSortKeysConfigs(rootSchema, schema);
+
 	const { output } = await sortJsoncContent(configContent, configFilePath, sortKeysConfigs);
 
 	if (shouldCheck) {
 		if (output !== configContent) {
 			console.error(`Configuration is not sorted: ${configFilePath}`);
+
 			process.exitCode = 1;
 		}
 
