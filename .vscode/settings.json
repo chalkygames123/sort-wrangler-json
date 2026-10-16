@@ -13,5 +13,14 @@
 	},
 	"[yaml]": {
 		"editor.defaultFormatter": "oxc.oxc-vscode"
+	},
+	"files.readonlyInclude": {
+		"pnpm-lock.yaml": true
+	},
+	"files.watcherExclude": {
+		"pnpm-lock.yaml": true
+	},
+	"search.exclude": {
+		"pnpm-lock.yaml": true
 	}
 }
