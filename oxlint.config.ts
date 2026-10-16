@@ -11,7 +11,7 @@ export default defineConfig({
 		typeAware: true,
 		typeCheck: true,
 	},
-	plugins: ['eslint', 'import', 'jsdoc', 'node', 'oxc', 'promise', 'typescript', 'unicorn', 'vitest'],
+	plugins: ['eslint', 'import', 'jsdoc', 'node', 'oxc', 'promise', 'typescript', 'unicorn'],
 	rules: {
 		'@stylistic/line-comment-position': 'deny',
 		'@stylistic/padding-line-between-statements': [

@@ -18,8 +18,8 @@
 		"fmt:check": "oxfmt --check",
 		"lint": "oxlint",
 		"lint:fix": "oxlint --fix --fix-suggestions --fix-dangerously",
-		"test": "vitest run",
-		"test:watch": "vitest"
+		"test": "node --test",
+		"test:watch": "node --test --watch"
 	},
 	"dependencies": {
 		"eslint": "catalog:",
@@ -39,7 +39,6 @@
 		"oxlint": "catalog:",
 		"oxlint-tsgolint": "catalog:",
 		"typescript": "catalog:",
-		"vitest": "catalog:",
 		"wrangler": "catalog:",
 		"zod": "catalog:"
 	},

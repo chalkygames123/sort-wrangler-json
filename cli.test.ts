@@ -1,10 +1,11 @@
+import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, readFile, rm, stat, symlink, utimes, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { describe, test } from 'node:test';
 
 import type { JSONSchema7 } from 'json-schema';
-import { describe, expect, test } from 'vitest';
 
 import {
 	createSortKeysConfigs,
@@ -12,11 +13,11 @@ import {
 	generatePropertyOrder,
 	resolveSchemaRef,
 	sortJsoncContent,
-} from './cli';
+} from './cli.ts';
 
-describe('sort-wrangler-json', () => {
-	describe('resolveSchemaRef', () => {
-		test('should resolve a schema reference', () => {
+void describe('sort-wrangler-json', () => {
+	void describe('resolveSchemaRef', () => {
+		void test('should resolve a schema reference', () => {
 			const schema: JSONSchema7 = {
 				definitions: {
 					TestConfig: {
@@ -30,7 +31,7 @@ describe('sort-wrangler-json', () => {
 
 			const result = resolveSchemaRef(schema, '#/definitions/TestConfig');
 
-			expect(result).toEqual({
+			assert.deepStrictEqual(result, {
 				type: 'object',
 				properties: {
 					foo: { type: 'string' },
@@ -38,17 +39,17 @@ describe('sort-wrangler-json', () => {
 			});
 		});
 
-		test('should throw an error for invalid reference', () => {
+		void test('should throw an error for invalid reference', () => {
 			const schema: JSONSchema7 = {};
 
-			expect(() => resolveSchemaRef(schema, '#/invalid/ref')).toThrow(
-				'Unable to resolve schema reference: #/invalid/ref',
-			);
+			assert.throws(() => resolveSchemaRef(schema, '#/invalid/ref'), {
+				message: 'Unable to resolve schema reference: #/invalid/ref',
+			});
 		});
 	});
 
-	describe('extractRootSchema', () => {
-		test('should extract root schema with properties', () => {
+	void describe('extractRootSchema', () => {
+		void test('should extract root schema with properties', () => {
 			const schema: JSONSchema7 = {
 				properties: {
 					name: { type: 'string' },
@@ -57,10 +58,10 @@ describe('sort-wrangler-json', () => {
 
 			const result = extractRootSchema(schema);
 
-			expect(result).toEqual(schema);
+			assert.deepStrictEqual(result, schema);
 		});
 
-		test('should resolve $ref and extract root schema', () => {
+		void test('should resolve $ref and extract root schema', () => {
 			const schema: JSONSchema7 = {
 				$ref: '#/definitions/RawConfig',
 				definitions: {
@@ -74,14 +75,14 @@ describe('sort-wrangler-json', () => {
 
 			const result = extractRootSchema(schema);
 
-			expect(result).toEqual({
+			assert.deepStrictEqual(result, {
 				properties: {
 					name: { type: 'string' },
 				},
 			});
 		});
 
-		test('should resolve allOf references and extract root schema properties', () => {
+		void test('should resolve allOf references and extract root schema properties', () => {
 			const schema: JSONSchema7 = {
 				definitions: {
 					RawConfig: {
@@ -95,20 +96,22 @@ describe('sort-wrangler-json', () => {
 
 			const result = extractRootSchema(schema);
 
-			expect(result.properties).toEqual({
+			assert.deepStrictEqual(result.properties, {
 				name: { type: 'string' },
 			});
 		});
 
-		test('should throw an error when properties cannot be extracted', () => {
+		void test('should throw an error when properties cannot be extracted', () => {
 			const schema: JSONSchema7 = {};
 
-			expect(() => extractRootSchema(schema)).toThrow('Unable to extract properties from the schema.');
+			assert.throws(() => extractRootSchema(schema), {
+				message: 'Unable to extract properties from the schema.',
+			});
 		});
 	});
 
-	describe('generatePropertyOrder', () => {
-		test('should generate property order with env at the end', () => {
+	void describe('generatePropertyOrder', () => {
+		void test('should generate property order with env at the end', () => {
 			const schema: JSONSchema7 = {
 				properties: {
 					name: { type: 'string' },
@@ -120,10 +123,10 @@ describe('sort-wrangler-json', () => {
 
 			const result = generatePropertyOrder(schema);
 
-			expect(result).toEqual(['name', 'main', 'vars', 'env']);
+			assert.deepStrictEqual(result, ['name', 'main', 'vars', 'env']);
 		});
 
-		test('should generate property order without env', () => {
+		void test('should generate property order without env', () => {
 			const schema: JSONSchema7 = {
 				properties: {
 					name: { type: 'string' },
@@ -133,18 +136,20 @@ describe('sort-wrangler-json', () => {
 
 			const result = generatePropertyOrder(schema);
 
-			expect(result).toEqual(['name', 'main']);
+			assert.deepStrictEqual(result, ['name', 'main']);
 		});
 
-		test('should throw an error when properties do not exist', () => {
+		void test('should throw an error when properties do not exist', () => {
 			const schema: JSONSchema7 = {};
 
-			expect(() => generatePropertyOrder(schema)).toThrow('The root schema does not contain any properties.');
+			assert.throws(() => generatePropertyOrder(schema), {
+				message: 'The root schema does not contain any properties.',
+			});
 		});
 	});
 
-	describe('createSortKeysConfigs', () => {
-		test('should build configurations for nested schema paths', () => {
+	void describe('createSortKeysConfigs', () => {
+		void test('should build configurations for nested schema paths', () => {
 			const schema: JSONSchema7 = {
 				definitions: {
 					Nested: {
@@ -214,7 +219,7 @@ describe('sort-wrangler-json', () => {
 			const expectConfig = (pattern: string) => {
 				const match = configs.find((config) => config.pathPattern === pattern);
 
-				expect(match).toBeDefined();
+				assert.ok(match);
 
 				if (!match) {
 					throw new Error(`Configuration for pattern ${pattern} not found.`);
@@ -223,32 +228,38 @@ describe('sort-wrangler-json', () => {
 				return match;
 			};
 
-			expect(expectConfig(ROOT_PATTERN)).toMatchObject({
+			assert.deepStrictEqual(expectConfig(ROOT_PATTERN), {
+				pathPattern: ROOT_PATTERN,
 				order: ['foo', 'bar', 'baz', 'env'],
 			});
 
-			expect(expectConfig(BAR_PATTERN)).toMatchObject({
+			assert.deepStrictEqual(expectConfig(BAR_PATTERN), {
+				pathPattern: BAR_PATTERN,
 				order: ['second', 'first', 'nested'],
 			});
 
-			expect(expectConfig(BAR_NESTED_PATTERN)).toMatchObject({
+			assert.deepStrictEqual(expectConfig(BAR_NESTED_PATTERN), {
+				pathPattern: BAR_NESTED_PATTERN,
 				order: ['delta', 'alpha'],
 			});
 
-			expect(expectConfig(BAZ_ITEM_PATTERN)).toMatchObject({
+			assert.deepStrictEqual(expectConfig(BAZ_ITEM_PATTERN), {
+				pathPattern: BAZ_ITEM_PATTERN,
 				order: ['z', 'a'],
 			});
 
-			expect(expectConfig(ENV_ENV_PATTERN)).toMatchObject({
+			assert.deepStrictEqual(expectConfig(ENV_ENV_PATTERN), {
+				pathPattern: ENV_ENV_PATTERN,
 				order: ['gamma', 'beta', 'list', 'nested'],
 			});
 
-			expect(expectConfig(ENV_LIST_ITEM_PATTERN)).toMatchObject({
+			assert.deepStrictEqual(expectConfig(ENV_LIST_ITEM_PATTERN), {
+				pathPattern: ENV_LIST_ITEM_PATTERN,
 				order: ['z', 'a'],
 			});
 		});
 
-		test('should stop descending when schema definitions are recursive', () => {
+		void test('should stop descending when schema definitions are recursive', () => {
 			const schema: JSONSchema7 = {
 				definitions: {
 					RecursiveConfig: {
@@ -275,68 +286,55 @@ describe('sort-wrangler-json', () => {
 
 			const configs = createSortKeysConfigs(rootSchema, schema);
 
-			expect(configs).toEqual(
-				expect.arrayContaining([
-					expect.objectContaining({
-						pathPattern: '^$',
-						order: ['previews'],
-					}),
-					expect.objectContaining({
-						pathPattern: '^previews$',
-						order: ['name', 'child'],
-					}),
-					expect.objectContaining({
-						pathPattern: '^previews\\.child$',
-						order: ['enabled', 'recursive'],
-					}),
-					expect.objectContaining({
-						pathPattern: '^previews\\.child\\.recursive$',
-						order: ['name', 'child'],
-					}),
-				]),
-			);
+			for (const expected of [
+				{ pathPattern: '^$', order: ['previews'] },
+				{ pathPattern: '^previews$', order: ['name', 'child'] },
+				{ pathPattern: '^previews\\.child$', order: ['enabled', 'recursive'] },
+				{ pathPattern: '^previews\\.child\\.recursive$', order: ['name', 'child'] },
+			]) {
+				assert.deepStrictEqual(
+					configs.find((config) => config.pathPattern === expected.pathPattern),
+					expected,
+				);
+			}
 
-			expect(configs).not.toEqual(
-				expect.arrayContaining([
-					expect.objectContaining({
-						pathPattern: '^previews\\.child\\.recursive\\.child$',
-					}),
-				]),
-			);
+			assert.ok(!configs.some((config) => config.pathPattern === '^previews\\.child\\.recursive\\.child$'));
 		});
 	});
 
-	describe('sortJsoncContent', () => {
-		test.each(['jsonc', 'json'])('should sort %s content correctly', async (extension) => {
-			const content = `{
+	void describe('sortJsoncContent', () => {
+		for (const extension of ['jsonc', 'json']) {
+			void test(`should sort ${extension} content correctly`, async () => {
+				const content = `{
 	"name": "test",
 	"main": "index.js",
 	"compatibility_date": "2025-01-01"
 }`;
 
-			const filePath = `test.${extension}`;
+				const filePath = `test.${extension}`;
 
-			const sortKeysConfigs = [
-				{
-					pathPattern: '^$',
-					order: ['name', 'compatibility_date', 'main'],
-				},
-			];
+				const sortKeysConfigs = [
+					{
+						pathPattern: '^$',
+						order: ['name', 'compatibility_date', 'main'],
+					},
+				];
 
-			const { output } = await sortJsoncContent(content, filePath, sortKeysConfigs);
+				const { output } = await sortJsoncContent(content, filePath, sortKeysConfigs);
 
-			const expected = `{
+				const expected = `{
 	"name": "test",
 	"compatibility_date": "2025-01-01",
 	"main": "index.js"
 }`;
 
-			expect(output).toBe(expected);
-		});
+				assert.strictEqual(output, expected);
+			});
+		}
 	});
 
-	describe('integration test', () => {
-		test('should sort unsorted fixture to match sorted fixture', async () => {
+	void describe('integration test', () => {
+		void test('should sort unsorted fixture to match sorted fixture', async () => {
 			const configFilePath = path.join(import.meta.dirname, 'test/fixtures', 'wrangler.original.jsonc');
 
 			const configContent = await readFile(configFilePath, 'utf-8');
@@ -361,10 +359,10 @@ describe('sort-wrangler-json', () => {
 
 			const expectedConfigContent = await readFile(expectedConfigFilePath, 'utf-8');
 
-			expect(output).toBe(expectedConfigContent);
+			assert.strictEqual(output, expectedConfigContent);
 		});
 
-		test('should run when invoked through a symlinked entry point', async () => {
+		void test('should run when invoked through a symlinked entry point', async () => {
 			const temporaryDirectory = await mkdtemp(path.join(tmpdir(), 'sort-wrangler-json-'));
 
 			const symlinkedCliPath = path.join(temporaryDirectory, 'cli.ts');
@@ -376,17 +374,17 @@ describe('sort-wrangler-json', () => {
 					encoding: 'utf8',
 				});
 
-				expect(result.status).toBe(0);
+				assert.strictEqual(result.status, 0);
 
-				expect(result.stderr).toBe('');
+				assert.strictEqual(result.stderr, '');
 
-				expect(result.stdout).toContain('Usage: sort-wrangler-json');
+				assert.ok(result.stdout.includes('Usage: sort-wrangler-json'));
 			} finally {
 				await rm(temporaryDirectory, { recursive: true, force: true });
 			}
 		});
 
-		test('should run from the directory specified with -C', async () => {
+		void test('should run from the directory specified with -C', async () => {
 			const temporaryDirectory = await mkdtemp(path.join(tmpdir(), 'sort-wrangler-json-'));
 
 			const configFilePath = path.join(temporaryDirectory, 'wrangler.jsonc');
@@ -423,17 +421,17 @@ describe('sort-wrangler-json', () => {
 					{ encoding: 'utf8' },
 				);
 
-				expect(result.status).toBe(0);
+				assert.strictEqual(result.status, 0);
 
-				expect(result.stderr).toBe('');
+				assert.strictEqual(result.stderr, '');
 
-				expect(await readFile(configFilePath, 'utf-8')).toBe(expectedConfig);
+				assert.strictEqual(await readFile(configFilePath, 'utf-8'), expectedConfig);
 			} finally {
 				await rm(temporaryDirectory, { recursive: true, force: true });
 			}
 		});
 
-		test('should write sorted output to the configuration file by default', async () => {
+		void test('should write sorted output to the configuration file by default', async () => {
 			const temporaryDirectory = await mkdtemp(path.join(tmpdir(), 'sort-wrangler-json-'));
 
 			const configFilePath = path.join(temporaryDirectory, 'wrangler.jsonc');
@@ -470,19 +468,19 @@ describe('sort-wrangler-json', () => {
 					{ cwd: temporaryDirectory, encoding: 'utf8' },
 				);
 
-				expect(result.status).toBe(0);
+				assert.strictEqual(result.status, 0);
 
-				expect(result.stderr).toBe('');
+				assert.strictEqual(result.stderr, '');
 
-				expect(result.stdout).toBe('');
+				assert.strictEqual(result.stdout, '');
 
-				expect(await readFile(configFilePath, 'utf-8')).toBe(expectedConfig);
+				assert.strictEqual(await readFile(configFilePath, 'utf-8'), expectedConfig);
 			} finally {
 				await rm(temporaryDirectory, { recursive: true, force: true });
 			}
 		});
 
-		test('should not write to the configuration file when it is already sorted', async () => {
+		void test('should not write to the configuration file when it is already sorted', async () => {
 			const temporaryDirectory = await mkdtemp(path.join(tmpdir(), 'sort-wrangler-json-'));
 
 			const configFilePath = path.join(temporaryDirectory, 'wrangler.jsonc');
@@ -520,21 +518,21 @@ describe('sort-wrangler-json', () => {
 					{ cwd: temporaryDirectory, encoding: 'utf8' },
 				);
 
-				expect(result.status).toBe(0);
+				assert.strictEqual(result.status, 0);
 
-				expect(result.stderr).toBe('');
+				assert.strictEqual(result.stderr, '');
 
-				expect(result.stdout).toBe('');
+				assert.strictEqual(result.stdout, '');
 
-				expect(await readFile(configFilePath, 'utf-8')).toBe(sortedConfig);
+				assert.strictEqual(await readFile(configFilePath, 'utf-8'), sortedConfig);
 
-				expect((await stat(configFilePath, { bigint: true })).mtimeNs).toBe(modifiedAtBefore);
+				assert.strictEqual((await stat(configFilePath, { bigint: true })).mtimeNs, modifiedAtBefore);
 			} finally {
 				await rm(temporaryDirectory, { recursive: true, force: true });
 			}
 		});
 
-		test('should check sorted output without writing to the configuration file', async () => {
+		void test('should check sorted output without writing to the configuration file', async () => {
 			const temporaryDirectory = await mkdtemp(path.join(tmpdir(), 'sort-wrangler-json-'));
 
 			const configFilePath = path.join(temporaryDirectory, 'wrangler.jsonc');
@@ -575,25 +573,25 @@ describe('sort-wrangler-json', () => {
 
 				const unsortedResult = runCheck();
 
-				expect(unsortedResult.status).toBe(1);
+				assert.strictEqual(unsortedResult.status, 1);
 
-				expect(unsortedResult.stdout).toBe('');
+				assert.strictEqual(unsortedResult.stdout, '');
 
-				expect(unsortedResult.stderr).toContain('Configuration is not sorted');
+				assert.ok(unsortedResult.stderr.includes('Configuration is not sorted'));
 
-				expect(await readFile(configFilePath, 'utf-8')).toBe(originalConfig);
+				assert.strictEqual(await readFile(configFilePath, 'utf-8'), originalConfig);
 
 				await writeFile(configFilePath, sortedConfig, 'utf-8');
 
 				const sortedResult = runCheck();
 
-				expect(sortedResult.status).toBe(0);
+				assert.strictEqual(sortedResult.status, 0);
 
-				expect(sortedResult.stdout).toBe('');
+				assert.strictEqual(sortedResult.stdout, '');
 
-				expect(sortedResult.stderr).toBe('');
+				assert.strictEqual(sortedResult.stderr, '');
 
-				expect(await readFile(configFilePath, 'utf-8')).toBe(sortedConfig);
+				assert.strictEqual(await readFile(configFilePath, 'utf-8'), sortedConfig);
 			} finally {
 				await rm(temporaryDirectory, { recursive: true, force: true });
 			}
